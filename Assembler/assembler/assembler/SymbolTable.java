@@ -12,21 +12,26 @@ import java.util.HashMap;
 * as keys, and provide a get and a insert method.
 */
 public class SymbolTable {
-	private HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
-	
-	/**
-	 * Puts a Symbol into the symTab.
-	 * @return Null if no value was paired with the key. The value if otherwise
-	 */
-	public Symbol insertSymbol(String label, Symbol symbol){
-		return symTab.put(label, symbol);
-	}
-	
-	/**
-	 * Gets a Symbol from the symTab.
-	 * @return Null if no value was paired with the key. The value if otherwise
-	 */
-	public Symbol getSymbol(String label){
-		return symTab.get(label);
-	}
+	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
+//	
+//	/**
+//	 * Puts a Symbol into the symTab.
+//	 * @return Null if no value was paired with the key. The value if otherwise
+//	 */
+//	public Symbol insertSymbol(String label, Symbol symbol){
+//		return symTab.put(label, symbol);
+//	}
+//	
+//	/**
+//	 * Gets a Symbol from the symTab.
+//	 * @return Null if no value was paired with the key. The value if otherwise
+//	 */
+//	public Symbol getSymbol(String label){
+//		return symTab.get(label);
+//	}
+//	
+//	public Symbol searchHash(String label){
+//		symTab.
+//		
+//	}
 }
