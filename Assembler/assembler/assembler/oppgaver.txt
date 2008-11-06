@@ -1,0 +1,16 @@
+Class symTab()				Andreas
+	-addSymbolTing
+	-getSymbolTing
+
+method boolean isPCPossible(); er den i range?		Magnus
+
+method boolean isBasePossible(); er Base keyword brukt, NoBase ikke brukt		Magnus
+
+method string intToHex(int inputFraBruker); oversett en decimal til hex og returner	Magnus
+
+method void compareList(); Printout of original source with line numbers and line-matched object code, side 68?		Andreas
+
+method void printToRecord(string objectCode); print objectcode to .txt fil		Magnus
+
+method int findNumberOfBytesInConstant(); Simen
+
