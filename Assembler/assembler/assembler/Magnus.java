@@ -67,7 +67,7 @@ public class Magnus {
 			startAddress = assemblyLine.getOperand1();
 			while(startAddress.length() < 6) startAddress += "0";
 			
-			LOCCTR = startAddress;
+			LOCCTR = intToHex((Integer.parseInt(startAddress)));
 		}
 		else LOCCTR = "000000";
 		while(!alstr.atEnd()){
@@ -75,6 +75,7 @@ public class Magnus {
 			if(!assemblyLine.isFullComment()){
 				if(assemblyLine.getLabel() != ""){
 					if(symTab.containsKey(assemblyLine.getLabel())){
+//						TODO: finne ut korsjen vi kasta skikkeelige exeptions
 //						throw new IllegalDuplicateError;
 					}
 					else {
@@ -89,7 +90,8 @@ public class Magnus {
 			}
 			assemblyLine = alstr.nextAL();
 		}
-		
+//		TODO: hexToInt før vi kan regne ut programLength
+//		programLength = LOCCTR - startAddress;
 
 	}
 	
