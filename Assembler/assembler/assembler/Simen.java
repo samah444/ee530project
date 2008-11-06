@@ -7,13 +7,14 @@ public class Simen {
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	private AL assemblyLine;
 	
+	private String[] regName = {"A", "X", "L", "B", "S", "T", "F", "PC", "SW"};
+	private String[] value = {"0", "1", "2", "3", "4", "5", "6", "8", "9"}; 
+	
 	public void fillSymTabWithRegisters(){
-		//slide 8 på sp2-2
-		symTab.put(A, sym);
-//		
-//		if (A) 
-//			Symbol sym = new Symbol(0, "", "", "");
-//		symTab.put(A,sym);
+		for(int i = 0; i<regName.length; i++){
+			Symbol sym = new Symbol(value[i], "", 0, 0);
+			symTab.put(regName[i], sym);
+		}
 	}
 	
 
