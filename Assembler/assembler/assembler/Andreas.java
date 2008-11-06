@@ -6,6 +6,8 @@ package assembler;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.IllegalFormatException;
 
 /**
  * @author Andreas
@@ -17,12 +19,67 @@ public class Andreas {
 	private int lineNumber = 0;
 	private BufferedWriter outOverview;
 
+	private String startAddress;
+	private String programLength;
+	private ALStream alstr;
+	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
+
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+
+
+
+	}
+
+	//	Assemble instructions (generate opcode and look up addresses)
+	//	 Generate data values defined by BYTE, WORD
+	//	 Perform processing of assembler directives not done during Pass 1
+	//	 Write the object program and the assembly listing
+	public void secondPass(){
+		while(!alstr.atEnd()){
+			assemblyLine = alstr.nextAL();
+			if(assemblyLine.getOpmnemonic().equals("START")){
+				printToRecord(makeHeaderRecord());
+			}
+			if(assemblyLine.isFullComment()){}
+			else{
+				if(assemblyLine.getOperand1())
+				
+				
+			}
+			
+		}
+
+	}
+	//Creates the header record and returns it as a string.
+	public String makeHeaderRecord(){
+		String programName = assemblyLine.getLabel();
+		boolean shortened = false;
+		if (programName.equals(""))programName = "PROG  ";
+		while(programName.length() > 6){
+			shortened = true;
+			programName = programName.substring(0, programName.length()-1);
+		}
+		while(programName.length() < 7) programName += " ";
+		if(shortened){
+			System.out.println("Program name too long, has been cut to: "
+					+ programName);
+		}
+		return ("H" + programName + startAddress + programLength );
+	}
+
+	public static void printToRecord(String objectCode){
+		//		Takes an objectcode string and prints it as a new line in the RecordFile
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter("RecordFile", true));
+			out.write(objectCode);
+			out.close();
+		} catch (IOException e) {
+		}
 
 	}
 
 	//TODO: outOverview.close på slutten av Assembleren.
+	//Prints a line to the Overview text file.
 	public void printToOverviewFile(){
 		try {
 			//OPEN FILE
@@ -95,7 +152,7 @@ public class Andreas {
 
 	}
 
-
+	//Sets the LOCCTR to its correct position.
 	public void correctLOCCTR(){
 		String opmnemonic = assemblyLine.getOpmnemonic();
 		if(opmnemonic.equals("WORD"))locctr+=3;
@@ -104,13 +161,57 @@ public class Andreas {
 		else if(opmnemonic.equals("RESB"))	
 			locctr+= Integer.parseInt(assemblyLine.getOperand1());
 		else if(opmnemonic.equals("BYTE")){
-			// 	FIND LENGTH OF CONSTANT AND ADD TO LOCCTR
-			//	TODO: For BYTE: trenger en metode som: Find length of constant in bytes.
+			locctr+= findNumberOfBytesInConstant(assemblyLine.getOperand1());
 		}
 		else {
 			OpCode tempOpCode = new OpCode(opmnemonic);
 			locctr+=tempOpCode.getFormat();
 		}
 	}
+	
+	//Takes a decimal int from user and converts it to hex and returns string
+	public static String intToHex(int inputFromUser){
+		int i = inputFromUser;
+	    String s = Integer.toHexString(i);
+		return s;
+	}
+
+	public int findNumberOfBytesInConstant(String constant){
+		int LengthOfByte;
+		char[] byteContent = constant.toCharArray();
+		if(byteContent[0]== 'X'){
+			LengthOfByte = ((constant.length()-3)/2);
+		}
+		else LengthOfByte = (constant.length()-3);
+		return LengthOfByte;
+
+	}
+	
 
 }
+
+//startAddress = assemblyLine.getOperand1();
+//char[] startAddressArray = new char[6];
+//for (int i = 0; i < startAddressArray.length; i++){
+//	if (startAddress.length() < 6){
+//		while(i < (6 - startAddress.length())){
+//			startAddressArray[i] = 0;
+//		}
+//	}
+//	else startAddressArray[i] = startAddress.charAt ;
+//}
+//
+//	startAddress = assemblyLine.getOperand1();
+//char[] startAddressArray = new char[6];
+//for (int i = 0; i < startAddressArray.length; i++){
+//	int j = 0;
+//	if (startAddress.length() < 6){
+//		while(i < (6 - startAddress.length())){
+//			startAddressArray[i] = 0;
+//			
+//		}
+//	}
+//	else startAddressArray[i] = startAddress.charAt(i-j);
+//}
+//
+//
