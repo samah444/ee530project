@@ -12,7 +12,7 @@ public class Magnus {
 	private AL assemblyLine;
 	private Integer disp = 0;
 	private Boolean baseFlag;
-	private String startAddress, programLength, LOCCTR;
+	private String startAddress, programLength, locctr;
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	
 	Boolean isPCPossible(){
@@ -67,9 +67,9 @@ public class Magnus {
 			startAddress = assemblyLine.getOperand1();
 			while(startAddress.length() < 6) startAddress += "0";
 			
-			LOCCTR = intToHex((Integer.parseInt(startAddress)));
+			locctr = intToHex((Integer.parseInt(startAddress)));
 		}
-		else LOCCTR = "000000";
+		else locctr = "000000";
 		while(!alstr.atEnd()){
 
 			if(!assemblyLine.isFullComment()){
@@ -79,7 +79,7 @@ public class Magnus {
 //						throw new IllegalDuplicateError;
 					}
 					else {
-						Symbol sym = new Symbol(LOCCTR, "", 0, 0);
+						Symbol sym = new Symbol(locctr, "", 0, 0);
 						symTab.put(assemblyLine.getLabel(), sym);
 					}
 				}
@@ -90,25 +90,38 @@ public class Magnus {
 			}
 			assemblyLine = alstr.nextAL();
 		}
-//		TODO: hexToInt før vi kan regne ut programLength
-//		programLength = LOCCTR - startAddress;
-
+		programLength = hexMath(locctr, '-' ,startAddress);
+	}
+	
+	public String hexMath(String hex1, char operator, String hex2){
+		if (operator=='+'){
+			int i1= Integer.parseInt(hex1,16);
+			int i2= Integer.parseInt(hex2,16);
+			hex1 = Integer.toHexString(i1+i2);
+		}
+		if(operator=='-'){
+			int i1= Integer.parseInt(hex1,16);
+			int i2= Integer.parseInt(hex2,16);
+			hex1 = Integer.toHexString(i1-i2);
+		}
+//		else throw IllegalOperatorExeption;
+		return hex1;	
 	}
 	
 	public void correctLOCCTR(){
 		String opmnemonic = assemblyLine.getOpmnemonic();
-		if(opmnemonic.equals("WORD"))LOCCTR+=3;
+		if(opmnemonic.equals("WORD"))locctr+=3;
 		else if(opmnemonic.equals("RESW"))
-			LOCCTR+= (3 * Integer.parseInt(assemblyLine.getOperand1()));
+			locctr+= (3 * Integer.parseInt(assemblyLine.getOperand1()));
 		else if(opmnemonic.equals("RESB"))	
-			LOCCTR+= Integer.parseInt(assemblyLine.getOperand1());
+			locctr+= Integer.parseInt(assemblyLine.getOperand1());
 		else if(opmnemonic.equals("BYTE")){
 			// 	FIND LENGTH OF CONSTANT AND ADD TO LOCCTR
 			//	TODO: For BYTE: trenger en metode som: Find length of constant in bytes.
 		}
 		else {
 			OpCode tempOpCode = new OpCode(opmnemonic);
-			LOCCTR+=tempOpCode.getFormat();
+			locctr+=tempOpCode.getFormat();
 		}
 	}
 }
