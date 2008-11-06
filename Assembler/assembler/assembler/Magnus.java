@@ -3,11 +3,17 @@ package assembler;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.IllegalFormatException;
 
 public class Magnus {
 
+	private ALStream alstr;
+	private AL assemblyLine;
 	private Integer disp = 0;
 	private Boolean baseFlag;
+	private String startAddress, programLength, LOCCTR;
+	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	
 	Boolean isPCPossible(){
 //		When program-counter relative mode is used, disp
@@ -50,5 +56,57 @@ public class Magnus {
 	    }
 
 	}
+	
+//	PASS ONE
+	public void passOne(){
 
+		assemblyLine = alstr.nextAL();
+		
+		if (assemblyLine.getLabel() == "START"){
+			
+			startAddress = assemblyLine.getOperand1();
+			while(startAddress.length() < 6) startAddress += "0";
+			
+			LOCCTR = startAddress;
+		}
+		else LOCCTR = "000000";
+		while(!alstr.atEnd()){
+
+			if(!assemblyLine.isFullComment()){
+				if(assemblyLine.getLabel() != ""){
+					if(symTab.containsKey(assemblyLine.getLabel())){
+//						throw new IllegalDuplicateError;
+					}
+					else {
+						Symbol sym = new Symbol(LOCCTR, "", 0, 0);
+						symTab.put(assemblyLine.getLabel(), sym);
+					}
+				}
+				if(assemblyLine.getOpmnemonic() != ""){
+					correctLOCCTR();
+				}
+//				else throw new InvalidOpcode;
+			}
+			assemblyLine = alstr.nextAL();
+		}
+		
+
+	}
+	
+	public void correctLOCCTR(){
+		String opmnemonic = assemblyLine.getOpmnemonic();
+		if(opmnemonic.equals("WORD"))LOCCTR+=3;
+		else if(opmnemonic.equals("RESW"))
+			LOCCTR+= (3 * Integer.parseInt(assemblyLine.getOperand1()));
+		else if(opmnemonic.equals("RESB"))	
+			LOCCTR+= Integer.parseInt(assemblyLine.getOperand1());
+		else if(opmnemonic.equals("BYTE")){
+			// 	FIND LENGTH OF CONSTANT AND ADD TO LOCCTR
+			//	TODO: For BYTE: trenger en metode som: Find length of constant in bytes.
+		}
+		else {
+			OpCode tempOpCode = new OpCode(opmnemonic);
+			LOCCTR+=tempOpCode.getFormat();
+		}
+	}
 }
