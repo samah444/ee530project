@@ -14,6 +14,8 @@ public class Simen {
 		//i er da en decimal. putt desimalen inn i magnus sin og vips du har en hex.
 		String hex = intToHex(decimalRepresentasjonAvBokstaven);
 		return hex;
+		
+		//gjør i mårra, må sove!
 	}
 	
 	public static String intToHex(int inputFromUser){
