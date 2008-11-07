@@ -62,12 +62,13 @@ public class Magnus {
 
 		assemblyLine = alstr.nextAL();
 		
-		if (assemblyLine.getLabel() == "START"){
+		if (assemblyLine.getOpmnemonic() == "START"){
 			
 			startAddress = assemblyLine.getOperand1();
-			while(startAddress.length() < 6) startAddress += "0";
+			while(startAddress.length() < 6) startAddress = "0" + startAddress;
 			
 			locctr = intToHex((Integer.parseInt(startAddress)));
+			assemblyLine = alstr.nextAL();
 		}
 		else locctr = "000000";
 		while(!alstr.atEnd()){
@@ -90,7 +91,8 @@ public class Magnus {
 			}
 			assemblyLine = alstr.nextAL();
 		}
-		programLength = hexMath(locctr, '-' ,startAddress);
+		String programLength = hexMath(locctr, '-' ,startAddress);
+		while(programLength.length() < 6) programLength = "0" + programLength;
 	}
 	
 	public String hexMath(String hex1, char operator, String hex2){
