@@ -9,10 +9,12 @@ public class Simen {
 	
 	
 	public String constantToHex(String constant){
+		
 		//constant har form: X'ABC' eller C'ABC'; 
-		int decimalRepresentasjonAvBokstaven = Integer.parseInt(constant-skrell);
+		int dec = findNumberOfBytesInConstant(constant);
+		//int decimalRepresentasjonAvBokstaven = Integer.parseInt(findNumberOfBytesInConstant(constant));
 		//i er da en decimal. putt desimalen inn i magnus sin og vips du har en hex.
-		String hex = intToHex(decimalRepresentasjonAvBokstaven);
+		String hex = intToHex(dec);
 		return hex;
 		
 		//gjør i mårra, må sove!
