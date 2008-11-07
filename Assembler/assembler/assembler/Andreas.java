@@ -15,7 +15,7 @@ import java.util.IllegalFormatException;
  */
 public class Andreas {
 	private AL assemblyLine;
-	private int locctr = 0;
+	private String locctr = "0000";
 	private int lineNumber = 0;
 	private BufferedWriter outOverview;
 
@@ -42,7 +42,7 @@ public class Andreas {
 			}
 			if(assemblyLine.isFullComment()){}
 			else{
-				if(assemblyLine.getOperand1())
+				//if(assemblyLine.getOperand1())
 				
 				
 			}
@@ -155,18 +155,38 @@ public class Andreas {
 	//Sets the LOCCTR to its correct position.
 	public void correctLOCCTR(){
 		String opmnemonic = assemblyLine.getOpmnemonic();
-		if(opmnemonic.equals("WORD"))locctr+=3;
-		else if(opmnemonic.equals("RESW"))
-			locctr+= (3 * Integer.parseInt(assemblyLine.getOperand1()));
-		else if(opmnemonic.equals("RESB"))	
-			locctr+= Integer.parseInt(assemblyLine.getOperand1());
+		if(opmnemonic.equals("WORD"))locctr = hexMath(locctr, '+', "3");
+		else if(opmnemonic.equals("RESW")){
+			int change = (3 * Integer.parseInt(assemblyLine.getOperand1()));
+			locctr = hexMath(locctr, '+', intToHex(change));
+		}
+		else if(opmnemonic.equals("RESB")){	
+			int change = (Integer.parseInt(assemblyLine.getOperand1()));
+			locctr = hexMath(locctr, '+', intToHex(change));
+		}
 		else if(opmnemonic.equals("BYTE")){
-			locctr+= findNumberOfBytesInConstant(assemblyLine.getOperand1());
+			int change = findNumberOfBytesInConstant(assemblyLine.getOperand1());
+			locctr = hexMath(locctr, '+', intToHex(change));
 		}
 		else {
 			OpCode tempOpCode = new OpCode(opmnemonic);
-			locctr+=tempOpCode.getFormat();
+			locctr = hexMath(locctr, '+', intToHex(tempOpCode.getFormat()));
 		}
+	}
+	
+	public String hexMath(String hex1, char operator, String hex2){
+		if (operator=='+'){
+			int i1= Integer.parseInt(hex1,16);
+			int i2= Integer.parseInt(hex2,16);
+			hex1 = Integer.toHexString(i1+i2);
+		}
+		if(operator=='-'){
+			int i1= Integer.parseInt(hex1,16);
+			int i2= Integer.parseInt(hex2,16);
+			hex1 = Integer.toHexString(i1-i2);
+		}
+//		else throw IllegalOperatorExeption;
+		return hex1;	
 	}
 	
 	//Takes a decimal int from user and converts it to hex and returns string

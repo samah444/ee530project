@@ -14,3 +14,7 @@ method void printToRecord(string objectCode); print objectcode to .txt fil		Magn
 
 method int findNumberOfBytesInConstant(); Simen
 
+method void fillSymTabWithRegisters(); Simen
+
+method String constantToHex(string constant); 
+

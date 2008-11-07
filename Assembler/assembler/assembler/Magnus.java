@@ -118,11 +118,15 @@ public class Magnus {
 		else if(opmnemonic.equals("RESB"))	
 			locctr+= Integer.parseInt(assemblyLine.getOperand1());
 		else if(opmnemonic.equals("BYTE")){
-			// 	FIND LENGTH OF CONSTANT AND ADD TO LOCCTR
-			//	TODO: For BYTE: trenger en metode som: Find length of constant in bytes.
+			locctr+= findNumberOfBytesInConstant(assemblyLine.getOperand1());
 		}
 		else {
 			OpCode tempOpCode = new OpCode(opmnemonic);
+			locctr+=tempOpCode.getFormat();
+		}
+		else {
+			OpCode tempOpCode = new OpCode(opmnemonic);
+			LOCCTR+=tempOpCode.getFormat();
 			locctr+=tempOpCode.getFormat();
 		}
 	}
