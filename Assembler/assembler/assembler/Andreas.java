@@ -35,21 +35,60 @@ public class Andreas {
 	//	 Perform processing of assembler directives not done during Pass 1
 	//	 Write the object program and the assembly listing
 	public void secondPass(){
+		String operand1;
+		String operand2;
+		String objectCode;
 		while(!alstr.atEnd()){
 			assemblyLine = alstr.nextAL();
+			operand1 = assemblyLine.getOperand1();
+			operand2 = assemblyLine.getOperand2();
 			if(assemblyLine.getOpmnemonic().equals("START")){
 				printToRecord(makeHeaderRecord());
 			}
 			if(assemblyLine.isFullComment()){}
 			else{
-				//if(assemblyLine.getOperand1())
-				
-				
+				if(assemblyLine.getOpmnemonic().equals("BYTE")
+						|| (assemblyLine.getOpmnemonic().equals("WORD"))){
+					//Simen sin 
+					//objectCode = constantToHex(assemblyLine.getOperand1());
+				}
+				searchAndReplaceSymbol();
+
+
 			}
-			
 		}
+	}
+	//Returns true if operand is a Symbol, false otherwise.
+	public boolean isSymbol(String operand){
+		if(!operand.equals("")){
+			if((operand.matches("[a-zA-Z]*"))&&
+					(!operand.matches(".'"))){
+				return true;
+			}
+			else return false;
+		}
+		return false;
+	}
+	
+	public 
+
+	//Searches for symbol in operand and replaces it with value from symTab
+	public void searchAndReplaceSymbol(){
+		if(!assemblyLine.getOperand1().equals("")){
+			if((assemblyLine.getOperand1().matches("[a-zA-Z]*"))&&
+					(!assemblyLine.getOperand1().matches(".'"))){
+				Symbol tempSym = symTab.get(assemblyLine.getOperand1());
+				if(tempSym == null){return;}//TODO: Throw undefined symbol excep. Set error-flag?
+
+			}
+			char[] tempCharArr = assemblyLine.getOperand1().toCharArray();
+			//if(tempCharArr[0]){}
+
+		}
+		return;
 
 	}
+
 	//Creates the header record and returns it as a string.
 	public String makeHeaderRecord(){
 		String programName = assemblyLine.getLabel();
@@ -173,7 +212,7 @@ public class Andreas {
 			locctr = hexMath(locctr, '+', intToHex(tempOpCode.getFormat()));
 		}
 	}
-	
+
 	public String hexMath(String hex1, char operator, String hex2){
 		if (operator=='+'){
 			int i1= Integer.parseInt(hex1,16);
@@ -185,14 +224,14 @@ public class Andreas {
 			int i2= Integer.parseInt(hex2,16);
 			hex1 = Integer.toHexString(i1-i2);
 		}
-//		else throw IllegalOperatorExeption;
+		//		else throw IllegalOperatorExeption;
 		return hex1;	
 	}
-	
+
 	//Takes a decimal int from user and converts it to hex and returns string
 	public static String intToHex(int inputFromUser){
 		int i = inputFromUser;
-	    String s = Integer.toHexString(i);
+		String s = Integer.toHexString(i);
 		return s;
 	}
 
@@ -206,7 +245,7 @@ public class Andreas {
 		return LengthOfByte;
 
 	}
-	
+
 
 }
 
