@@ -15,10 +15,11 @@ import java.util.IllegalFormatException;
  */
 public class Andreas {
 	private AL assemblyLine;
-	private String locctr = "0000";
+	private String locctr = "000000";
 	private int lineNumber = 0;
 	private BufferedWriter outOverview;
 
+	private int lengthOfTextRec = 0;
 	private String startAddress;
 	private String programLength;
 	private ALStream alstr;
@@ -37,27 +38,83 @@ public class Andreas {
 	public void secondPass(){
 		String operand1;
 		String operand2;
-		String objectCode;
+		String objectCode = "";
 		while(!alstr.atEnd()){
 			assemblyLine = alstr.nextAL();
-			operand1 = assemblyLine.getOperand1();
-			operand2 = assemblyLine.getOperand2();
-			if(assemblyLine.getOpmnemonic().equals("START")){
-				printToRecord(makeHeaderRecord());
-			}
-			if(assemblyLine.isFullComment()){}
-			else{
-				if(assemblyLine.getOpmnemonic().equals("BYTE")
-						|| (assemblyLine.getOpmnemonic().equals("WORD"))){
-					//Simen sin 
-					//objectCode = constantToHex(assemblyLine.getOperand1());
+			//IF OPCODE IS NOT END
+			if(!assemblyLine.getOpmnemonic().equals("END")){
+				operand1 = assemblyLine.getOperand1();
+				operand2 = assemblyLine.getOperand2();
+				if(assemblyLine.getOpmnemonic().equals("START")){
+					printHeaderRecord();
 				}
-				searchAndReplaceSymbol();
-
-
+				//IF COMMENT
+				if(assemblyLine.isFullComment()){}
+				//IF NOT COMMENT
+				else{
+					//IF BYTE OR WORD
+					if(assemblyLine.getOpmnemonic().equals("BYTE")
+							|| (assemblyLine.getOpmnemonic().equals("WORD"))){
+						objectCode = constantToHex(assemblyLine.getOperand1());
+					}
+					//IF NOT BYTE OR WORD
+					else{
+						if(isSymbol(operand1))operand1 = findSymbolAddress(operand1);
+						if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
+						//TODO:kall magnus-metoden
+						//objectCode = assembleObjectCode();
+						
+					}
+					if(lengthOfTextRec == 0)initializeTextRecord();
+					if((fitIntoTextRec(objectCode)) 
+							&& (!assemblyLine.getOpmnemonic().equals("RESW"))
+							&& (!assemblyLine.getOpmnemonic().equals("RESB")))
+							printObjectCodeToRecord(objectCode);
+					//IF OBJECTCODE DOESNT FIT INTO CURRENT TEXTRECORD OR OPERATOR IS RESW OR RESB
+					else {
+						fixLengthInTextRecord();
+						initializeTextRecord();
+						printObjectCodeToRecord(objectCode);
+					}
+				}
 			}
+			//IF OPCODE = END
+			else printEndRecord();
+			printToOverviewFile();
 		}
 	}
+	
+	//Prints the given objectCode to record and increases the lengthOfTextRec.
+	public void printObjectCodeToRecord(String objectCode){
+		printToRecord(objectCode);
+		lengthOfTextRec += objectCode.length();
+	}
+	
+	//Will objecCode fit into current TextRecord? True if Yes, False otherwise.
+	public boolean fitIntoTextRec(String objectCode){
+		if((objectCode.length()+lengthOfTextRec)<70)
+			return false;
+		else
+			return true;
+	}
+	
+	//Initializes a Text Record and writes it to file.
+	public void initializeTextRecord(){
+		lengthOfTextRec = 0;
+		correctLOCCTRformat();
+		printToRecord("\nT" +  locctr + "00");
+		lengthOfTextRec += 9;
+	}
+
+	public void correctLOCCTRformat(){
+		while(locctr.length() < 6)locctr = "0" + locctr;
+	}
+
+	//Creates the end record and returns it as a string.
+	public void printEndRecord(){
+		printToRecord("E" + startAddress);
+	}
+
 	//Returns true if operand is a Symbol, false otherwise.
 	public boolean isSymbol(String operand){
 		if(!operand.equals("")){
@@ -69,28 +126,29 @@ public class Andreas {
 		}
 		return false;
 	}
+
+	public String findSymbolAddress(String operand){
+		Symbol aSymbol = symTab.get(operand);
+		if (aSymbol == null){return "";}//TODO: Throw undefined Symbol exception. Set error flag?
+		else return aSymbol.getAddress();	
+	}
+
 	
-	public 
 
-	//Searches for symbol in operand and replaces it with value from symTab
-	public void searchAndReplaceSymbol(){
-		if(!assemblyLine.getOperand1().equals("")){
-			if((assemblyLine.getOperand1().matches("[a-zA-Z]*"))&&
-					(!assemblyLine.getOperand1().matches(".'"))){
-				Symbol tempSym = symTab.get(assemblyLine.getOperand1());
-				if(tempSym == null){return;}//TODO: Throw undefined symbol excep. Set error-flag?
-
-			}
-			char[] tempCharArr = assemblyLine.getOperand1().toCharArray();
-			//if(tempCharArr[0]){}
-
+	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
+	public String constantToHex(String constant){
+		int decContent = 0;
+		char[] byteContent = constant.toCharArray();
+		String hex = "";
+		for(int i = 2; i<constant.length()-1; i++){
+			decContent = Integer.parseInt("" + byteContent[i]);
+			hex += intToHex(decContent);
 		}
-		return;
-
+		return hex;
 	}
 
 	//Creates the header record and returns it as a string.
-	public String makeHeaderRecord(){
+	public void printHeaderRecord(){
 		String programName = assemblyLine.getLabel();
 		boolean shortened = false;
 		if (programName.equals(""))programName = "PROG  ";
@@ -100,10 +158,11 @@ public class Andreas {
 		}
 		while(programName.length() < 7) programName += " ";
 		if(shortened){
+			//TODO: kanskje annen behandling av dette
 			System.out.println("Program name too long, has been cut to: "
 					+ programName);
 		}
-		return ("H" + programName + startAddress + programLength );
+		printToRecord("H" + programName + startAddress + programLength );
 	}
 
 	public static void printToRecord(String objectCode){
@@ -248,6 +307,23 @@ public class Andreas {
 
 
 }
+
+////Searches for symbol in operand and replaces it with value from symTab
+//public void searchAndReplaceSymbol(){
+//	if(!assemblyLine.getOperand1().equals("")){
+//		if((assemblyLine.getOperand1().matches("[a-zA-Z]*"))&&
+//				(!assemblyLine.getOperand1().matches(".'"))){
+//			Symbol tempSym = symTab.get(assemblyLine.getOperand1());
+//			if(tempSym == null){return;}//TODO: Throw undefined symbol excep. Set error-flag?
+//
+//		}
+//		char[] tempCharArr = assemblyLine.getOperand1().toCharArray();
+//		//if(tempCharArr[0]){}
+//
+//	}
+//	return;
+//}
+
 
 //startAddress = assemblyLine.getOperand1();
 //char[] startAddressArray = new char[6];
