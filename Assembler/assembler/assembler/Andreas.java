@@ -65,6 +65,7 @@ public class Andreas {
 						//objectCode = assembleObjectCode();
 						
 					}
+					//WRITE TO TEXTRECORD
 					if(lengthOfTextRec == 0)initializeTextRecord();
 					if((fitIntoTextRec(objectCode)) 
 							&& (!assemblyLine.getOpmnemonic().equals("RESW"))
@@ -80,7 +81,9 @@ public class Andreas {
 			}
 			//IF OPCODE = END
 			else printEndRecord();
+			assemblyLine.setAssembledOpcode(objectCode);
 			printToOverviewFile();
+			correctLOCCTR();
 		}
 	}
 	
