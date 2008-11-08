@@ -3,31 +3,29 @@ package assembler;
 import java.util.HashMap;
 
 public class Simen {
-	
+
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	private AL assemblyLine;
-	
-	
+
+	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
 	public String constantToHex(String constant){
-		
-		//constant har form: X'ABC' eller C'ABC'; 
-		int dec = findNumberOfBytesInConstant(constant);
-		//int decimalRepresentasjonAvBokstaven = Integer.parseInt(findNumberOfBytesInConstant(constant));
-		//i er da en decimal. putt desimalen inn i magnus sin og vips du har en hex.
-		String hex = intToHex(dec);
+		int decContent = 0;
+		char[] byteContent = constant.toCharArray();
+		String bc = new String(byteContent);
+		for(int i = 0; i<constant.length(); i++)
+			decContent = Integer.parseInt(bc);
+		String hex = intToHex(decContent);
 		return hex;
-		
-		//gjør i mårra, må sove!
 	}
-	
+
 	public static String intToHex(int inputFromUser){
-//		Takes a decimal int from user and converts it to hex and returns string
-		
+		//		Takes a decimal int from user and converts it to hex and returns string
+
 		int i = inputFromUser;
-	    String s = Integer.toHexString(i);
+		String s = Integer.toHexString(i);
 		return s;
 	}
-	
+
 	public void fillSymTabWithRegisters(){
 		String[] regName = {"A", "X", "L", "B", "S", "T", "F", "PC", "SW"};
 		String[] value = {"0", "1", "2", "3", "4", "5", "6", "8", "9"}; 
@@ -36,7 +34,7 @@ public class Simen {
 			symTab.put(regName[i], sym);
 		}
 	}
-	
+
 
 	public int findNumberOfBytesInConstant(String constant){
 		int LengthOfByte;
@@ -49,7 +47,7 @@ public class Simen {
 		else LengthOfByte = (constant.length()-3);
 		return LengthOfByte;
 	}
-	
-	
+
+
 }
 
