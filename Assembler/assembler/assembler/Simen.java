@@ -11,10 +11,11 @@ public class Simen {
 	public String constantToHex(String constant){
 		int decContent = 0;
 		char[] byteContent = constant.toCharArray();
-		String bc = new String(byteContent);
-		for(int i = 0; i<constant.length(); i++)
-			decContent = Integer.parseInt(bc);
-		String hex = intToHex(decContent);
+		String hex = "";
+		for(int i = 2; i<constant.length()-1; i++){
+			decContent = Integer.parseInt("" + byteContent[i]);
+			hex += intToHex(decContent);
+		}
 		return hex;
 	}
 
