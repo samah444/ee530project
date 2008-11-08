@@ -12,7 +12,7 @@ public class Magnus {
 	private AL assemblyLine;
 	private Integer disp = 0;
 	private Boolean baseFlag;
-	private String startAddress, programLength, locctr;
+	private String startAddress, programLength, locctr, targetAddress;
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	
 	Boolean isPCPossible(){
@@ -23,7 +23,7 @@ public class Magnus {
 //		TA=(PC)+ disp 
 //		Program-counter relative b=0,p=1
 		
-		if ((-2048 <= disp && disp <= 2047))
+		if ((-2048 <= Integer.parseInt(targetAddress, 16) && Integer.parseInt(targetAddress, 16) <= 2047))
 		return true;
 		else return false;
 	}
@@ -34,7 +34,7 @@ public class Magnus {
 //		TA=(B)+disp
 //		Base relative b=1,p=0 
 		
-		if(0 <= disp && disp <=4095 && baseFlag == true)
+		if(0 <= Integer.parseInt(targetAddress, 16) && Integer.parseInt(targetAddress, 16) <=4095 && baseFlag == true)
 		return true;
 		else return false;
 	}
@@ -85,7 +85,7 @@ public class Magnus {
 					}
 				}
 				if(assemblyLine.getOpmnemonic() != ""){
-					correctLOCCTR();
+					correctLOCCTR(assemblyLine);
 				}
 //				else throw new InvalidOpcode;
 			}
@@ -110,24 +110,117 @@ public class Magnus {
 		return hex1;	
 	}
 	
-	public void correctLOCCTR(){
+	//Sets the LOCCTR to its correct position.
+	public void correctLOCCTR(AL assemblyLine){
 		String opmnemonic = assemblyLine.getOpmnemonic();
-		if(opmnemonic.equals("WORD"))locctr+=3;
-		else if(opmnemonic.equals("RESW"))
-			locctr+= (3 * Integer.parseInt(assemblyLine.getOperand1()));
-		else if(opmnemonic.equals("RESB"))	
-			locctr+= Integer.parseInt(assemblyLine.getOperand1());
-		else if(opmnemonic.equals("BYTE")){
-			locctr+= findNumberOfBytesInConstant(assemblyLine.getOperand1());
+		if(opmnemonic.equals("WORD"))locctr = hexMath(locctr, '+', "3");
+		else if(opmnemonic.equals("RESW")){
+			int change = (3 * Integer.parseInt(assemblyLine.getOperand1()));
+			locctr = hexMath(locctr, '+', intToHex(change));
+		}
+		else if(opmnemonic.equals("RESB")){	
+			int change = (Integer.parseInt(assemblyLine.getOperand1()));
+			locctr = hexMath(locctr, '+', intToHex(change));
+		}
+		else if(opmnemonic. equals("BYTE")){
+			int change = findNumberOfBytesInConstant(assemblyLine.getOperand1());
+			locctr = hexMath(locctr, '+', intToHex(change));
 		}
 		else {
 			OpCode tempOpCode = new OpCode(opmnemonic);
-			locctr+=tempOpCode.getFormat();
-		}
-		else {
-			OpCode tempOpCode = new OpCode(opmnemonic);
-			LOCCTR+=tempOpCode.getFormat();
-			locctr+=tempOpCode.getFormat();
+			locctr = hexMath(locctr, '+', intToHex(tempOpCode.getFormat()));
 		}
 	}
+	
+//	Makes object code
+	public String makeObjectCode() throws IOException{
+	
+		String objectCode, opCodeValue, programCounter, base, targetAddress, disp, tempLocctr, x="0", b="0", p="0", e="0";
+			
+//		get value of mnemonic in optable
+		
+		OpTable opTable = new OpTable();
+		opCodeValue = opTable.lookup_AsHex(assemblyLine.getOpmnemonic());
+		
+//		get value of targetAddress(TA)
+		targetAddress = operand1;
+		
+//		check indirect and immediate
+		if(assemblyLine.isIndirect() && !assemblyLine.isImmediate())	
+			opCodeValue = hexMath(opCodeValue, '+', "2");
+			
+		else if(!assemblyLine.isIndirect() && assemblyLine.isImmediate())
+			opCodeValue = hexMath(opCodeValue, '+', "2");
+		
+		else opCodeValue = hexMath(opCodeValue, '+', "3");
+		
+//		check index
+		if(assemblyLine.isIndexed())
+			x="1";
+		
+//		check if pcPossible and if true, get PC
+		if(isPCPossible()){
+			p="1";
+			b="0";
+			
+//			getting the PC from next lines locctr then resetting the locctr
+			AL tempAssemblyLine = alstr.nextAL();
+			tempLocctr = locctr;
+			correctLOCCTR(tempAssemblyLine);
+			programCounter = locctr;
+						
+			locctr = tempLocctr;	
+			
+//			setting disp for PC-relative(=TA-PC)
+			disp = hexMath(targetAddress, '-', programCounter);
+			while (disp.length() < 3) disp = "0" + disp;
+		}
+		
+//		check if basePossible and if true, get basevalue
+		else if (isBasePossible()){
+			p="0";
+			b="1";
+			
+//			get basevalue
+//			base = 
+			
+//			setting disp for base-relative(=TA-BASE)
+			disp = hexMath(targetAddress, '-', base);
+			while (disp.length() < 3) disp = "0" + disp;
+			
+		}
+		else {
+			p="0";
+			b="0";
+		}
+//		check if extended
+		if(assemblyLine.isExtended())
+			e="1";
+
+		String flagHex = x+p+b+e; 
+		int i= Integer.parseInt(flagHex,2);
+	    flagHex = Integer.toHexString(i);
+	    
+	    		
+//		make objectcode
+	    while (opCodeValue.length() < 2) opCodeValue = "0" + opCodeValue;
+	    
+	    objectCode = opCodeValue + flagHex + disp;
+	    
+	    return objectCode;
+	}
+	
+	public int findNumberOfBytesInConstant(String constant){
+		int LengthOfByte;
+		char[] byteContent = constant.toCharArray();
+		//if(constant.equals("BYTE")){
+
+		if(byteContent[0]== 'X'){
+			LengthOfByte = ((constant.length()-3)/2);
+		}
+		else LengthOfByte = (constant.length()-3);
+		return LengthOfByte;
+	}
+
+	
 }
