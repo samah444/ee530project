@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class Simen {
 
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
-	private AL assemblyLine;
+	//private AL assemblyLine;
 	private BufferedWriter outRecord;
 	private int lengthOfTextRec;
 	private String objectCodeString;
