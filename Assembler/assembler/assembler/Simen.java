@@ -11,12 +11,18 @@ public class Simen {
 	private AL assemblyLine;
 	private BufferedWriter outRecord;
 	private int lengthOfTextRec;
+	private String objectCodeString;
 	
 	public void fixLengthInTextRecord(){
-		char[] lengthOf = new char(lengthOfTextRec);
-		hex = intToHex(lengthOf.length);
-		
-		
+		char[] objectCodeArray = objectCodeString.toCharArray();
+		String hex = intToHex(lengthOfTextRec-9);
+		if(hex.length()==1){
+			objectCodeArray[8]='0';
+			objectCodeArray[9]=(hex.toCharArray())[0];
+		}
+		else
+			objectCodeArray[8]=(hex.toCharArray())[0];
+			objectCodeArray[9]=(hex.toCharArray())[1];	
 	}
 
 	//Will objecCode fit into current TextRecord? True if Yes, False otherwise.
