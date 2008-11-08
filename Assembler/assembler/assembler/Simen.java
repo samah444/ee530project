@@ -1,11 +1,33 @@
 package assembler;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class Simen {
 
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	private AL assemblyLine;
+	private BufferedWriter outRecord;
+	
+	//Will objecCode fit into current TextRecord? True if Yes, False otherwise.
+	public boolean fitIntoTextRec(String objectCode){
+		
+		
+		return true;
+		
+	}
+	
+	public void printToRecord(String objectCode){
+//		Takes an objectcode string and prints it as a new line in the RecordFile
+		try {
+			if(outRecord == null) 
+				outRecord = new BufferedWriter(new FileWriter("Overview", true));
+	        outRecord.write(objectCode);
+	    } catch (IOException e) {
+	    }
+	}
 
 	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
 	public String constantToHex(String constant){
