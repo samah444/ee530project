@@ -10,23 +10,24 @@ public class Simen {
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	private AL assemblyLine;
 	private BufferedWriter outRecord;
-	
+	private int lengthOfTextRec;
+
 	//Will objecCode fit into current TextRecord? True if Yes, False otherwise.
 	public boolean fitIntoTextRec(String objectCode){
-		
-		
-		return true;
-		
+		if((objectCode.length()+lengthOfTextRec)<70)
+			return false;
+		else
+			return true;
 	}
-	
+
 	public void printToRecord(String objectCode){
-//		Takes an objectcode string and prints it as a new line in the RecordFile
+		//		Takes an objectcode string and prints it as a new line in the RecordFile
 		try {
 			if(outRecord == null) 
 				outRecord = new BufferedWriter(new FileWriter("Overview", true));
-	        outRecord.write(objectCode);
-	    } catch (IOException e) {
-	    }
+			outRecord.write(objectCode);
+		} catch (IOException e) {
+		}
 	}
 
 	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
