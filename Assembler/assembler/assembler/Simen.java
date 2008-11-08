@@ -11,6 +11,13 @@ public class Simen {
 	private AL assemblyLine;
 	private BufferedWriter outRecord;
 	private int lengthOfTextRec;
+	
+	public void fixLengthInTextRecord(){
+		char[] lengthOf = new char(lengthOfTextRec);
+		hex = intToHex(lengthOf.length);
+		
+		
+	}
 
 	//Will objecCode fit into current TextRecord? True if Yes, False otherwise.
 	public boolean fitIntoTextRec(String objectCode){
