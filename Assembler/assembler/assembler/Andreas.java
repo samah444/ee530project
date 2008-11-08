@@ -18,7 +18,10 @@ public class Andreas {
 	private String locctr = "000000";
 	private int lineNumber = 0;
 	private BufferedWriter outOverview;
-
+	
+	private boolean baseFlag = false;
+	private String base = "";
+	private String objectCodeString = "";
 	private int lengthOfTextRec = 0;
 	private String startAddress;
 	private String programLength;
@@ -26,8 +29,6 @@ public class Andreas {
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 
 	public static void main(String[] args) {
-
-
 
 	}
 
@@ -52,6 +53,17 @@ public class Andreas {
 				if(assemblyLine.isFullComment()){}
 				//IF NOT COMMENT
 				else{
+					//IF BASE
+					if(assemblyLine.getOpmnemonic().equals("BASE")){
+						baseFlag = true;
+						if(isSymbol(operand1))base = findSymbolAddress(operand1);
+						else base = operand1;
+					}
+					//IF NOT BASE
+					else if(assemblyLine.getOpmnemonic().equals("NOBASE")){
+						baseFlag = false;
+						base = "";
+					}
 					//IF BYTE OR WORD
 					if(assemblyLine.getOpmnemonic().equals("BYTE")
 							|| (assemblyLine.getOpmnemonic().equals("WORD"))){
@@ -70,12 +82,13 @@ public class Andreas {
 					if((fitIntoTextRec(objectCode)) 
 							&& (!assemblyLine.getOpmnemonic().equals("RESW"))
 							&& (!assemblyLine.getOpmnemonic().equals("RESB")))
-							printObjectCodeToRecord(objectCode);
+							writeObjectCode(objectCode);
 					//IF OBJECTCODE DOESNT FIT INTO CURRENT TEXTRECORD OR OPERATOR IS RESW OR RESB
 					else {
 						fixLengthInTextRecord();
+						printToRecord(objectCodeString + "\n");
 						initializeTextRecord();
-						printObjectCodeToRecord(objectCode);
+						writeObjectCode(objectCode);
 					}
 				}
 			}
@@ -83,13 +96,25 @@ public class Andreas {
 			else printEndRecord();
 			assemblyLine.setAssembledOpcode(objectCode);
 			printToOverviewFile();
-			correctLOCCTR();
+			correctLOCCTR(assemblyLine);
 		}
 	}
 	
+	public void fixLengthInTextRecord(){
+		char[] objectCodeArray = objectCodeString.toCharArray();
+		String hex = intToHex(lengthOfTextRec-9);
+		if(hex.length()==1){
+			objectCodeArray[8]='0';
+			objectCodeArray[9]=(hex.toCharArray())[0];
+		}
+		else
+			objectCodeArray[8]=(hex.toCharArray())[0];
+			objectCodeArray[9]=(hex.toCharArray())[1];	
+	}
+	
 	//Prints the given objectCode to record and increases the lengthOfTextRec.
-	public void printObjectCodeToRecord(String objectCode){
-		printToRecord(objectCode);
+	public void writeObjectCode(String objectCode){
+		objectCodeString += objectCode;
 		lengthOfTextRec += objectCode.length();
 	}
 	
@@ -105,7 +130,7 @@ public class Andreas {
 	public void initializeTextRecord(){
 		lengthOfTextRec = 0;
 		correctLOCCTRformat();
-		printToRecord("\nT" +  locctr + "00");
+		objectCodeString = "T" +  locctr + "00";
 		lengthOfTextRec += 9;
 	}
 
@@ -121,8 +146,8 @@ public class Andreas {
 	//Returns true if operand is a Symbol, false otherwise.
 	public boolean isSymbol(String operand){
 		if(!operand.equals("")){
-			if((operand.matches("[a-zA-Z]*"))&&
-					(!operand.matches(".'"))){
+			if(((operand.matches("[a-zA-Z]*"))&&
+					(!operand.matches(".'"))) || (operand.matches("*"))){
 				return true;
 			}
 			else return false;
@@ -254,7 +279,7 @@ public class Andreas {
 	}
 
 	//Sets the LOCCTR to its correct position.
-	public void correctLOCCTR(){
+	public void correctLOCCTR(AL assemblyLine){
 		String opmnemonic = assemblyLine.getOpmnemonic();
 		if(opmnemonic.equals("WORD"))locctr = hexMath(locctr, '+', "3");
 		else if(opmnemonic.equals("RESW")){
