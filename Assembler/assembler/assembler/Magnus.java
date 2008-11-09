@@ -150,7 +150,7 @@ public class Magnus {
 	//	Makes object code
 	public String makeObjectCode() throws IOException{
 
-		String objectCode, opCodeValue, programCounter, base, targetAddress, disp, tempLocctr, x="0", b="0", p="0", e="0";
+		String objectCode, opCodeValue, programCounter, base, targetAddress, disp, x="0", b="0", p="0", e="0";
 
 		//		get value of mnemonic in optable
 
@@ -190,16 +190,13 @@ public class Magnus {
 
 				//			getting the PC from next lines locctr then resetting the locctr
 				
-				tempLocctr = locctr;
+				
 				
 				InterMediateLine currentInterMediateLine = iter.next();
 				interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
-				locctr = currentInterMediateLine.getLocctr();
+				programCounter = currentInterMediateLine.getLocctr();				
 				
-				programCounter = locctr;
-				
-				currentInterMediateLine = iter.previous();
-				locctr = tempLocctr;	
+				currentInterMediateLine = iter.previous();	
 
 				//			setting disp for PC-relative(=TA-PC)
 				disp = hexMath(targetAddress, '-', programCounter);
