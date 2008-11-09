@@ -25,10 +25,13 @@ public class TwoPass
 	private String base = "";
 	private String objectCodeString = "";
 	private int lengthOfTextRec = 0;
-	private String startAddress;
-	private String targetAddress;
-	private String programLength;
+	private String startAddress = "000000";
+	private String targetAddress = "0";
+	private String programLength = "000000";
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
+	String operand1;
+	String operand2;
+	String objectCode = "";
 
 
 	public TwoPass(OpTable opt, ALStream alstream)
@@ -42,44 +45,40 @@ public class TwoPass
 		// i.e.  Y O U R  C O D E ! ! ! !
 		
 		firstPass();
+		fillSymTabWithRegisters();
 		secondPass();
-		
+
 		try {
 			outOverview.close();
+			outRecord.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		
 	}
-//	PASS ONE
+	//	PASS ONE
 	public void firstPass(){
-
 		assemblyLine = alstr.nextAL();
-		
-
 		if (assemblyLine.getOpmnemonic() == "START"){
 
 			startAddress = assemblyLine.getOperand1();
 			while(startAddress.length() < 6) startAddress = "0" + startAddress;
 
 			locctr = intToHex((Integer.parseInt(startAddress)));
-			
+
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 			intermediateLines.add(currentInterMediateLine);
-			
+
 			assemblyLine = alstr.nextAL();
 		}
 		else locctr = "000000";
-		
-		
-		
+
+
+
 		while(!alstr.atEnd()){
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 			intermediateLines.add(currentInterMediateLine);
-			
+
 			if(!assemblyLine.isFullComment()){
 				if(assemblyLine.getLabel() != ""){
 					if(symTab.containsKey(assemblyLine.getLabel())){
@@ -96,19 +95,18 @@ public class TwoPass
 				}
 				//				else throw new InvalidOpcode;
 			}
-			
+
 			assemblyLine = alstr.nextAL();
 		}
 		String programLength = hexMath(locctr, '-' ,startAddress);
 		while(programLength.length() < 6) programLength = "0" + programLength;
 	}
+	
 	//The Second pass
 	public void secondPass(){
+		alstr.reset();
 		iter = intermediateLines.listIterator();
-		String operand1;
-		String operand2;
-		String objectCode = "";
-		while(!iter.hasNext()){
+		while(iter.hasNext()){
 			InterMediateLine currentInterMediateLine = iter.next();
 			interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
 			locctr = currentInterMediateLine.getLocctr();
@@ -119,6 +117,7 @@ public class TwoPass
 				operand2 = interMediateAssemblyLine.getOperand2();
 				if(interMediateAssemblyLine.getOpmnemonic().equals("START")){
 					printHeaderRecord(interMediateAssemblyLine);
+					initializeTextRecord();
 				}
 				//IF COMMENT
 				if(interMediateAssemblyLine.isFullComment()){}
@@ -140,14 +139,13 @@ public class TwoPass
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						
 					}
 					//WRITE TO TEXTRECORD
-					if(lengthOfTextRec == 0)initializeTextRecord();
+					//if(lengthOfTextRec == 0)initializeTextRecord();
 					if((fitIntoTextRec(objectCode)) 
 							&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
 							&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESB")))
-							writeObjectCode(objectCode);
+						writeObjectCode(objectCode);
 					//IF OBJECTCODE DOESNT FIT INTO CURRENT TEXTRECORD OR OPERATOR IS RESW OR RESB
 					else {
 						fixLengthInTextRecord();
@@ -160,21 +158,21 @@ public class TwoPass
 			//IF OPCODE = END
 			else printEndRecord();
 			interMediateAssemblyLine.setAssembledOpcode(objectCode);
-			printToOverviewFile(interMediateAssemblyLine);
+			printToOverviewFile(currentInterMediateLine);
 		}
 	}
-//	Makes object code
+	
+	//	Makes object code
 	public String makeObjectCode() throws IOException{
 
 		String objectCode, opCodeValue, programCounter, base, disp, x="0", b="0", p="0", e="0";
-		
-		String operand1 = interMediateAssemblyLine.getOperand1();
-		String operand2 = interMediateAssemblyLine.getOperand2();
+
+		//String operand1 = interMediateAssemblyLine.getOperand1();
+		//String operand2 = interMediateAssemblyLine.getOperand2();
 		//		get value of mnemonic in optable
 
-		OpCode tempOpCode = new OpCode(assemblyLine.getOpmnemonic());
-		OpTable opTable = new OpTable();
-		opCodeValue = opTable.lookup_AsHex(assemblyLine.getOpmnemonic());
+		OpCode tempOpCode = optab.getOpCode(interMediateAssemblyLine.getOpmnemonic());
+		opCodeValue = optab.lookup_AsHex(interMediateAssemblyLine.getOpmnemonic());
 
 		//		get value of targetAddress(TA)
 		targetAddress = operand1;
@@ -207,13 +205,13 @@ public class TwoPass
 				b="0";
 
 				//			getting the PC from next lines locctr then resetting the locctr
-				
-				
-				
+
+
+
 				InterMediateLine currentInterMediateLine = iter.next();
 				interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
 				programCounter = currentInterMediateLine.getLocctr();				
-				
+
 				currentInterMediateLine = iter.previous();	
 
 				//			setting disp for PC-relative(=TA-PC)
@@ -247,7 +245,7 @@ public class TwoPass
 			}
 
 
-			String flagHex = x+p+b+e; 
+			String flagHex = x+b+p+e; 
 			int i= Integer.parseInt(flagHex,2);
 			flagHex = Integer.toHexString(i);
 
@@ -280,9 +278,9 @@ public class TwoPass
 		//IF BASE
 		if(assemblyLine.getOpmnemonic().equals("BASE")){
 			baseFlag = true;
-			if(isSymbol(assemblyLine.getOperand1()))
-				base = findSymbolAddress(assemblyLine.getOperand1());
-			else base = assemblyLine.getOperand1();
+			if(isSymbol(operand1))
+				base = findSymbolAddress(operand1);
+			else base = operand1;
 		}
 		//IF NOT BASE
 		else if(assemblyLine.getOpmnemonic().equals("NOBASE")){
@@ -290,44 +288,47 @@ public class TwoPass
 			base = "";
 		}
 	}
-	
+
 	//Corrects the length in the text record.
 	public void fixLengthInTextRecord(){
 		char[] objectCodeArray = objectCodeString.toCharArray();
 		String hex = intToHex(lengthOfTextRec-9);
+		char[] tempCharArray = hex.toCharArray();
 		if(hex.length()==1){
-			objectCodeArray[8]='0';
-			objectCodeArray[9]=(hex.toCharArray())[0];
+			objectCodeArray[7]='0';
+			objectCodeArray[8]=tempCharArray[0];
 		}
-		else
+		else{
 			objectCodeArray[8]=(hex.toCharArray())[0];
 			objectCodeArray[9]=(hex.toCharArray())[1];	
+		}
 	}
-	
+
 	//Writes the given objectCode to record and increases the lengthOfTextRec.
 	public void writeObjectCode(String objectCode){
 		objectCodeString += objectCode;
 		lengthOfTextRec += objectCode.length();
 	}
-	
+
 	//Will objecCode fit into current TextRecord? True if Yes, False otherwise.
 	public boolean fitIntoTextRec(String objectCode){
 		if((objectCode.length()+lengthOfTextRec)<70)
-			return false;
-		else
 			return true;
+		else
+			return false;
 	}
-	
+
 	//Initializes a Text Record and writes it to record.
 	public void initializeTextRecord(){
 		lengthOfTextRec = 0;
-		correctLOCCTRformat();
+		locctr = correctFormat(locctr);
 		objectCodeString = "T" +  locctr + "00";
 		lengthOfTextRec += 9;
 	}
 	//Corrects the format of LOCCTR to 6 alphanumerical.
-	public void correctLOCCTRformat(){
-		while(locctr.length() < 6)locctr = "0" + locctr;
+	public String correctFormat(String string){
+		while(string.length() < 6)string = "0" + string;
+		return string;
 	}
 
 	//Creates the end record and prints it to file.
@@ -337,9 +338,10 @@ public class TwoPass
 
 	//Returns true if operand is a Symbol, false otherwise.
 	public boolean isSymbol(String operand){
+		//Pattern star = Pattern.compile("\h2A");
 		if(!operand.equals("")){
 			if(((operand.matches("[a-zA-Z]*"))&&
-					(!operand.matches(".'"))) || (operand.matches("*"))){
+					(!operand.matches(".'")))){// || (operand.matches("*"))){
 				return true;
 			}
 			else return false;
@@ -353,15 +355,13 @@ public class TwoPass
 		else return aSymbol.getAddress();	
 	}
 
-	
-
 	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
 	public String constantToHex(String constant){
 		int decContent = 0;
 		char[] byteContent = constant.toCharArray();
 		String hex = "";
 		for(int i = 2; i<constant.length()-1; i++){
-			decContent = Integer.parseInt("" + byteContent[i]);
+			decContent = (int)(byteContent[i]);
 			hex += intToHex(decContent);
 		}
 		return hex;
@@ -382,18 +382,19 @@ public class TwoPass
 			System.out.println("Program name too long, has been cut to: "
 					+ programName);
 		}
-		printToRecord("H" + programName + startAddress + programLength );
+		printToRecord("H" + programName + startAddress + programLength + "\n");
 	}
-	
+
 	//Prints a line to the Overview text file.
-	public void printToOverviewFile(AL assemblyLine){
+	public void printToOverviewFile(InterMediateLine iAssemblyLine){
 		try {
+			assemblyLine = iAssemblyLine.getAssemblyLine();
 			//OPEN FILE
 			if(outOverview == null) 
 				outOverview = new BufferedWriter(new FileWriter("Overview", true));
 			//LINE NUMBER
-			outOverview.write(lineNumber + "\t");
 			lineNumber++;
+			outOverview.write(lineNumber + "\t");
 
 			//IF COMMENT
 			if(assemblyLine.isFullComment())
@@ -402,9 +403,11 @@ public class TwoPass
 			//IF NOT COMMENT
 			else{
 				//LOCCTR
-				outOverview.write(locctr + "\t");
+				outOverview.write((correctFormat(iAssemblyLine.getLocctr())) + "\t");
 				//LABEL
-				outOverview.write(assemblyLine.getLabel() + "\t");
+				outOverview.write(assemblyLine.getLabel() + "\t\t");
+				if(assemblyLine.getLabel().length() < 6)
+					outOverview.write("\t");
 				//IF EXTENDED
 				if(assemblyLine.isExtended())outOverview.write("+");
 				//IF LITERAL
@@ -423,7 +426,7 @@ public class TwoPass
 					//IF DIRECTIVE
 					if(assemblyLine.isDirective()){
 						//DIRECTIVE OPERANDS
-						if (assemblyLine.getOperand2().equals(""))
+						if (operand2.equals(""))
 							outOverview.write(assemblyLine.getOperand1());
 						else outOverview.write(assemblyLine.getOperand2());
 					}
@@ -444,10 +447,14 @@ public class TwoPass
 					}
 					//INDEX
 					if(assemblyLine.isIndexed())outOverview.write(",X" + "\t");
-					else outOverview.write("\t");
+					else {
+						if(assemblyLine.getOperand1().length() < 6)
+							outOverview.write("\t");
+						outOverview.write("\t");
+					}
 				}
 				//OBJECTCODE
-				outOverview.write(assemblyLine.getAssembledObjectCode());
+				outOverview.write(objectCode);
 			}
 			outOverview.write("\n");
 
@@ -461,25 +468,31 @@ public class TwoPass
 	//Sets the LOCCTR to its correct position.
 	public void correctLOCCTR(AL assemblyLine){
 		String opmnemonic = assemblyLine.getOpmnemonic();
-		if(opmnemonic.equals("WORD"))locctr = hexMath(locctr, '+', "3");
-		else if(opmnemonic.equals("RESW")){
-			int change = (3 * Integer.parseInt(assemblyLine.getOperand1()));
-			locctr = hexMath(locctr, '+', intToHex(change));
-		}
-		else if(opmnemonic.equals("RESB")){	
-			int change = (Integer.parseInt(assemblyLine.getOperand1()));
-			locctr = hexMath(locctr, '+', intToHex(change));
-		}
-		else if(opmnemonic.equals("BYTE")){
-			int change = findNumberOfBytesInConstant(assemblyLine.getOperand1());
-			locctr = hexMath(locctr, '+', intToHex(change));
-		}
-		else {
-			OpCode tempOpCode = new OpCode(opmnemonic);
-			locctr = hexMath(locctr, '+', intToHex(tempOpCode.getFormat()));
+		if(!(opmnemonic.equals("START") || (opmnemonic.equals("END")))){
+			if(!assemblyLine.isFullComment()){
+				if(opmnemonic.equals("WORD"))locctr = hexMath(locctr, '+', "3");
+				else if(opmnemonic.equals("RESW")){
+					int change = (3 * Integer.parseInt(assemblyLine.getOperand1()));
+					locctr = hexMath(locctr, '+', intToHex(change));
+				}
+				else if(opmnemonic.equals("RESB")){	
+					int change = (Integer.parseInt(assemblyLine.getOperand1()));
+					locctr = hexMath(locctr, '+', intToHex(change));
+				}
+				else if(opmnemonic.equals("BYTE")){
+					int change = findNumberOfBytesInConstant(assemblyLine.getOperand1());
+					locctr = hexMath(locctr, '+', intToHex(change));
+				}
+				else if(assemblyLine.isExtended())
+					locctr = hexMath(locctr, '+', "4");
+				else {
+					OpCode tempOpCode = optab.getOpCode(opmnemonic);
+					locctr = hexMath(locctr, '+', intToHex(tempOpCode.getFormat()));
+				}
+			}
 		}
 	}
-	
+
 	//Finds number of bytes in given constant and returns it.
 	public int findNumberOfBytesInConstant(String constant){
 		int LengthOfByte;
@@ -507,10 +520,10 @@ public class TwoPass
 
 		//		TA=(PC)+ disp 
 		//		Program-counter relative b=0,p=1
-		
-		String operand1 = interMediateAssemblyLine.getOperand1();
-		targetAddress = operand1;
 
+		//String operand1 = interMediateAssemblyLine.getOperand1();
+		targetAddress = operand1;
+		if(targetAddress.equals(""))targetAddress = "0";
 		if ((-2048 <= Integer.parseInt(targetAddress, 16) && Integer.parseInt(targetAddress, 16) <= 2047))
 			return true;
 		else return false;
@@ -521,18 +534,30 @@ public class TwoPass
 
 		//		TA=(B)+disp
 		//		Base relative b=1,p=0 
-
+		targetAddress = operand1;
+		if(targetAddress.equals(""))targetAddress = "0";
 		if(0 <= Integer.parseInt(targetAddress, 16) && Integer.parseInt(targetAddress, 16) <=4095 && baseFlag == true)
 			return true;
 		else return false;
 	}
-
+	
+	//Takes a decimal int from user and converts it to hex and returns string
 	public String intToHex(int inputFromUser){
-		//		Takes a decimal int from user and converts it to hex and returns string
+		
 
 		int i = inputFromUser;
 		String s = Integer.toHexString(i);
 		return s;
+	}
+	
+	//Fills the SymTab with the register addresses.
+	public void fillSymTabWithRegisters(){
+		String[] regName = {"A", "X", "L", "B", "S", "T", "F", "PC", "SW"};
+		String[] value = {"0", "1", "2", "3", "4", "5", "6", "8", "9"}; 
+		for(int i = 0; i<regName.length; i++){
+			Symbol sym = new Symbol(value[i], "", 0, 0);
+			symTab.put(regName[i], sym);
+		}
 	}
 
 }
