@@ -16,5 +16,9 @@ method int findNumberOfBytesInConstant(); Simen
 
 method void fillSymTabWithRegisters(); Simen
 
-method String constantToHex(string constant); 
+method String constantToHex(string constant); Simen
+
+method boolean fitIntoTextRec(String objectCode);
+
+
 

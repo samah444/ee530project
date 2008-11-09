@@ -1,0 +1,187 @@
+
+CS530 Spring 2008
+Assembler Front-End
+
+
+The main function in Assembler.java will call the "assemble" method 
+in your TwoPass class. In order to test the Assembler.java file, 
+before having developed your assembler, uncomment the following 
+lines from main.
+
+
+   // alstr.showALStream();
+
+
+In order to execute the front-end and then your assemble method,
+uncomment the following lines from main (put the above line back in
+a comment).
+
+   // TwoPass tp = new TwoPass(optab,alstr);
+   // tp.assemble();
+
+
+Notice this implies the following prototypes, one for the TwoPass
+class constructor and one for the assemble method:
+
+ // TwoPass constructor
+ public TwoPass(OpTable optab, ALStream alstr)
+
+ // TwoPass assemble method
+ public void assemble()
+
+
+
+The function prototypes below collect together methods that are 
+likely to be useful for you. The ultimate arbiter of what each 
+does is the code--the list of public methods in the .java files 
+themselves.  Of course, not all these methods are needed by you. 
+Many are marked to indicate this.
+
+There are situations where you may wish to add a method or 
+possibly change an existing one. After careful consideration, 
+make your modification or addition and mark with, at least, this 
+comment line:
+
+ // CLIENT CHANGE HERE !!
+
+Any source code with modifications not so marked will have points 
+taken from the project grade.
+
+
+FUNCTION PROTOTYPES
+------------------
+
+/**************************
+   OpTable will answer 
+   the following methods for use during assembly. For the use of 
+   other methods, see the code and use caution.
+***************************/
+
+// For when you just want the hex instruction code
+public String lookup_AsHex(String opmnemonic)
+
+// For when you want an actual OpCode object to query for other 
+// details. Presumably you won't need this; the same information 
+// (plus) is in each AL object
+public OpCode getOpCode(String opmnemonic)
+
+/***************************/
+
+
+
+/***************************/
+// Methods on AL objects
+
+ public String getLabel()
+ public String getOpmnemonic()
+ public String getOperand1()
+ public String getOperand2()
+ public String getComment()
+
+ public boolean isFullComment()
+ public boolean isDirective()
+ public boolean isExtended()
+
+ public int getOperandType()
+ public boolean isIndexed()
+ public boolean isImmediate()
+ public boolean isIndirect()
+ public boolean isLiteral()
+
+
+/***************************/
+// Methods on the ALStream object:
+
+ // For debugging
+ public void showALStream()
+ public void showNextAL()
+
+ // So you can make a second pass through
+ public void reset() 
+
+ // So you can check if you've reached the end
+ public boolean atEnd()
+
+ // To get the next line-of-code object (AL instance) 
+ // in the stream for inspection
+ public AL nextAL()
+
+
+/****************************************************************/
+
+
+
+Some further comments:
+
+
+-- Literals and immediates are not allowed as arguments 
+   to directives although an argument might be made for doing so. 
+   Your code will only be tested in accordance with this fact. If you 
+   make changes that provide this functionality you should both 
+   mark your modifications as stated above and provide tests for it.
+
+-- Directives that require 2 arguments, that is, one in the label field
+   and one in the operand field (like RESW or EQU, for example) are 
+   listed in OpCodes.def as taking only one argument. The second is one 
+   from the operand field.  The first one is assumed to be a label.
+
+-- OpTable does not provide ascii character mapping, but a file that 
+   lists such a mapping is provided with the code.
+
+-- Note that the AL object gives direct information about the binary 
+   choice of being format 4 or not (isExtended?) but says nothing to 
+   distinguish formats 1,2, and 3. This is up to the assemble method 
+   (yours) to determine. For a hint, you might consider using getOpCode 
+   to get an opcode object by name from the table and ask it about its 
+   format.
+
+-- Notice that the OpTable builds itself from information in an external 
+   file, each time you run the assembler. Should you decide to implement 
+   new instructions, this is where you'd input that information. You are 
+   not encouraged to bother doing this.
+
+-- One sample source file is included. File "src_sicx" is a good one to 
+   use for testing your assembler (it is Fig 2.5 from your text). The 
+   formatting suffers in the file transfer process...cleaning up the tab 
+   alignment by hand for a few lines will reveal the familiar structure 
+   from the text's examples.  However, your assembler front-end will read 
+   it as is.
+
+-- Also provided is the output of the lexical front-end (when uncommented 
+   to show this as suggested above) for the input source files just so you 
+   can have that handy to help know how to use the AL object.
+
+
+
+HOW TO RUN THE ASSEMBLER
+
+  Once your TwoPass class with constructor and assemble method are 
+in place, compile the code
+
+  javac Assembler.java
+
+and then execute it
+
+  java Assembler  <Input_Source_File>    >    <Results_File>
+
+Of course you will want to have run javac *.java in the directory where 
+you downloaded all the other files for the assembler. For clarity those 
+are listed here: 
+
+Assembler.java
+AL.java
+ALStream.java
+OpCode.java
+OpTable.java
+
+AND other files:  
+  ascii (for your use if you need it), 
+  OpCodes.def (read by OpTable constructor), 
+  src_sicx, 
+  src_frontend_output 
+  README (this file)
+
+
+If you handled output to a file directly, you will not need to use 
+the output redirection above. If these statements are confusing to you, 
+see the instructor.

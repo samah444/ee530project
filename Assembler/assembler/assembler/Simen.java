@@ -25,6 +25,7 @@ public class Simen {
 			objectCodeArray[9]=(hex.toCharArray())[1];	
 	}
 
+	
 	//Will objecCode fit into current TextRecord? True if Yes, False otherwise.
 	public boolean fitIntoTextRec(String objectCode){
 		if((objectCode.length()+lengthOfTextRec)<70)

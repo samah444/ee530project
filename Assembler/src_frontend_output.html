@@ -1,0 +1,694 @@
+
+
+
+<html>
+<head>
+<title>CS530 Systems Programming Assembler Code: src_frontend_output</title>
+</head>
+
+<body bgcolor=white text=black link=#77cc77 alink=#55aa55 vlink=#55aa55 >
+
+
+<pre>
+
+
+
+ALStream Contents=============
+
+Label:  
+Opmnem: 
+Arg1:   
+Arg2:   
+Comnt:  .						EXAMPLE SIC/XE FULL-FEATURED INPUT (TEXT, FIG. 2.5)
+--&gt;isFullLineCmnt?: true
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         0
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: 
+Arg1:   
+Arg2:   
+Comnt:  .
+--&gt;isFullLineCmnt?: true
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         0
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  COPY
+Opmnem: START
+Arg1:   0
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    true
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  FIRST
+Opmnem: STL
+Arg1:   RETADR
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: LDB
+Arg1:   LENGTH
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    true
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: BASE
+Arg1:   LENGTH
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    true
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  CLOOP
+Opmnem: JSUB
+Arg1:   RDREC
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     true
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: LDA
+Arg1:   LENGTH
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: COMP
+Arg1:   0
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    true
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: JEQ
+Arg1:   ENDFIL
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: JSUB
+Arg1:   WRREC
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     true
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: J
+Arg1:   CLOOP
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  ENDFIL
+Opmnem: LDA
+Arg1:   EOF
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: STA
+Arg1:   BUFFER
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: LDA
+Arg1:   3
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    true
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: STA
+Arg1:   LENGTH
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: JSUB
+Arg1:   WRREC
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     true
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: J
+Arg1:   RETADR
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     true
+--&gt;isLiteral?:      false
+
+Label:  EOF
+Opmnem: BYTE
+Arg1:   C'EOF'
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    true
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  RETADR
+Opmnem: RESW
+Arg1:   1
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    true
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  LENGTH
+Opmnem: RESW
+Arg1:   1
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    true
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  BUFFER
+Opmnem: RESB
+Arg1:   4096
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    true
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  RDREC
+Opmnem: CLEAR
+Arg1:   X
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: CLEAR
+Arg1:   A
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: CLEAR
+Arg1:   S
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: LDT
+Arg1:   4096
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     true
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    true
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  RLOOP
+Opmnem: TD
+Arg1:   INPUT
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: JEQ
+Arg1:   RLOOP
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: RD
+Arg1:   INPUT
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: COMPR
+Arg1:   A
+Arg2:   S
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         2
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: JEQ
+Arg1:   EXIT
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: STCH
+Arg1:   BUFFER
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      true
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: TIXR
+Arg1:   T
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: JLT
+Arg1:   RLOOP
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  EXIT
+Opmnem: STX
+Arg1:   LENGTH
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: RSUB
+Arg1:   
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         0
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  INPUT
+Opmnem: BYTE
+Arg1:   X'F1'
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    true
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  WRREC
+Opmnem: CLEAR
+Arg1:   X
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: LDT
+Arg1:   LENGTH
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  WLOOP
+Opmnem: TD
+Arg1:   OUTPUT
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: JEQ
+Arg1:   WLOOP
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: LDCH
+Arg1:   BUFFER
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      true
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: WD
+Arg1:   OUTPUT
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: TIXR
+Arg1:   T
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: JLT
+Arg1:   WLOOP
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: RSUB
+Arg1:   
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    false
+--&gt;isExtended?:     false
+--&gt;numArgs:         0
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  OUTPUT
+Opmnem: BYTE
+Arg1:   X'05'
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    true
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+Label:  
+Opmnem: END
+Arg1:   FIRST
+Arg2:   
+Comnt:  
+--&gt;isFullLineCmnt?: false
+--&gt;isDirective?:    true
+--&gt;isExtended?:     false
+--&gt;numArgs:         1
+--&gt;isIndexed?:      false
+--&gt;isImmediate?:    false
+--&gt;isIndirect?:     false
+--&gt;isLiteral?:      false
+
+
+</pre>
+
+</body>
+</html>

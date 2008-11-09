@@ -37,11 +37,7 @@ public class Andreas {
 	public static void main(String[] args) {
 
 	}
-
-	//	Assemble instructions (generate opcode and look up addresses)
-	//	 Generate data values defined by BYTE, WORD
-	//	 Perform processing of assembler directives not done during Pass 1
-	//	 Write the object program and the assembly listing
+	//The Second pass
 	public void secondPass(){
 		iter = intermediateLines.listIterator();
 		String operand1;
@@ -73,8 +69,7 @@ public class Andreas {
 					else{
 						if(isSymbol(operand1))operand1 = findSymbolAddress(operand1);
 						if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
-						//TODO:kall magnus-metoden
-						//objectCode = assembleObjectCode();
+						objectCode = makeObjectCode();
 						
 					}
 					//WRITE TO TEXTRECORD
@@ -114,7 +109,7 @@ public class Andreas {
 			base = "";
 		}
 	}
-	
+	//Corrects the length in the text record.
 	public void fixLengthInTextRecord(){
 		char[] objectCodeArray = objectCodeString.toCharArray();
 		String hex = intToHex(lengthOfTextRec-9);
@@ -336,7 +331,7 @@ public class Andreas {
 		String s = Integer.toHexString(i);
 		return s;
 	}
-
+	//Finds number of bytes in given constant and returns it.
 	public int findNumberOfBytesInConstant(String constant){
 		int LengthOfByte;
 		char[] byteContent = constant.toCharArray();
