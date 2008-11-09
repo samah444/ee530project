@@ -134,7 +134,12 @@ public class TwoPass
 					else{
 						if(isSymbol(operand1))operand1 = findSymbolAddress(operand1);
 						if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
-						objectCode = makeObjectCode();
+						try {
+							objectCode = makeObjectCode();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						
 					}
 					//WRITE TO TEXTRECORD
