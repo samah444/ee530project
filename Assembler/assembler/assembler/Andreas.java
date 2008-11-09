@@ -6,8 +6,11 @@ package assembler;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
+import java.util.Iterator;
+import java.util.ListIterator;
 
 /**
  * @author Andreas
@@ -15,11 +18,14 @@ import java.util.IllegalFormatException;
  */
 public class Andreas {
 	private AL assemblyLine;
+	private AL interMediateAssemblyLine;
 	private String locctr = "000000";
 	private int lineNumber = 0;
 	private BufferedWriter outOverview;
 	
+	private ArrayList<InterMediateLine> intermediateLines = new ArrayList<InterMediateLine>();
 	private boolean baseFlag = false;
+	private ListIterator<InterMediateLine> iter;
 	private String base = "";
 	private String objectCodeString = "";
 	private int lengthOfTextRec = 0;
@@ -37,37 +43,31 @@ public class Andreas {
 	//	 Perform processing of assembler directives not done during Pass 1
 	//	 Write the object program and the assembly listing
 	public void secondPass(){
+		iter = intermediateLines.listIterator();
 		String operand1;
 		String operand2;
 		String objectCode = "";
-		while(!alstr.atEnd()){
+		while(!iter.hasNext()){
+			InterMediateLine currentInterMediateLine = iter.next();
+			interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
+			locctr = currentInterMediateLine.getLocctr();
 			assemblyLine = alstr.nextAL();
 			//IF OPCODE IS NOT END
-			if(!assemblyLine.getOpmnemonic().equals("END")){
-				operand1 = assemblyLine.getOperand1();
-				operand2 = assemblyLine.getOperand2();
-				if(assemblyLine.getOpmnemonic().equals("START")){
-					printHeaderRecord();
+			if(!interMediateAssemblyLine.getOpmnemonic().equals("END")){
+				operand1 = interMediateAssemblyLine.getOperand1();
+				operand2 = interMediateAssemblyLine.getOperand2();
+				if(interMediateAssemblyLine.getOpmnemonic().equals("START")){
+					printHeaderRecord(interMediateAssemblyLine);
 				}
 				//IF COMMENT
-				if(assemblyLine.isFullComment()){}
+				if(interMediateAssemblyLine.isFullComment()){}
 				//IF NOT COMMENT
 				else{
-					//IF BASE
-					if(assemblyLine.getOpmnemonic().equals("BASE")){
-						baseFlag = true;
-						if(isSymbol(operand1))base = findSymbolAddress(operand1);
-						else base = operand1;
-					}
-					//IF NOT BASE
-					else if(assemblyLine.getOpmnemonic().equals("NOBASE")){
-						baseFlag = false;
-						base = "";
-					}
+					searchAndProcessBase(interMediateAssemblyLine);
 					//IF BYTE OR WORD
-					if(assemblyLine.getOpmnemonic().equals("BYTE")
-							|| (assemblyLine.getOpmnemonic().equals("WORD"))){
-						objectCode = constantToHex(assemblyLine.getOperand1());
+					if(interMediateAssemblyLine.getOpmnemonic().equals("BYTE")
+							|| (interMediateAssemblyLine.getOpmnemonic().equals("WORD"))){
+						objectCode = constantToHex(interMediateAssemblyLine.getOperand1());
 					}
 					//IF NOT BYTE OR WORD
 					else{
@@ -80,8 +80,8 @@ public class Andreas {
 					//WRITE TO TEXTRECORD
 					if(lengthOfTextRec == 0)initializeTextRecord();
 					if((fitIntoTextRec(objectCode)) 
-							&& (!assemblyLine.getOpmnemonic().equals("RESW"))
-							&& (!assemblyLine.getOpmnemonic().equals("RESB")))
+							&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
+							&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESB")))
 							writeObjectCode(objectCode);
 					//IF OBJECTCODE DOESNT FIT INTO CURRENT TEXTRECORD OR OPERATOR IS RESW OR RESB
 					else {
@@ -94,9 +94,24 @@ public class Andreas {
 			}
 			//IF OPCODE = END
 			else printEndRecord();
-			assemblyLine.setAssembledOpcode(objectCode);
-			printToOverviewFile();
-			correctLOCCTR(assemblyLine);
+			interMediateAssemblyLine.setAssembledOpcode(objectCode);
+			printToOverviewFile(interMediateAssemblyLine);
+		}
+	}
+	
+	//Searches for BASE and NOBASE and processes it.
+	public void searchAndProcessBase(AL assemblyLine){
+		//IF BASE
+		if(assemblyLine.getOpmnemonic().equals("BASE")){
+			baseFlag = true;
+			if(isSymbol(assemblyLine.getOperand1()))
+				base = findSymbolAddress(assemblyLine.getOperand1());
+			else base = assemblyLine.getOperand1();
+		}
+		//IF NOT BASE
+		else if(assemblyLine.getOpmnemonic().equals("NOBASE")){
+			baseFlag = false;
+			base = "";
 		}
 	}
 	
@@ -112,7 +127,7 @@ public class Andreas {
 			objectCodeArray[9]=(hex.toCharArray())[1];	
 	}
 	
-	//Prints the given objectCode to record and increases the lengthOfTextRec.
+	//Writes the given objectCode to record and increases the lengthOfTextRec.
 	public void writeObjectCode(String objectCode){
 		objectCodeString += objectCode;
 		lengthOfTextRec += objectCode.length();
@@ -126,14 +141,14 @@ public class Andreas {
 			return true;
 	}
 	
-	//Initializes a Text Record and writes it to file.
+	//Initializes a Text Record and writes it to record.
 	public void initializeTextRecord(){
 		lengthOfTextRec = 0;
 		correctLOCCTRformat();
 		objectCodeString = "T" +  locctr + "00";
 		lengthOfTextRec += 9;
 	}
-
+	//Corrects the format of LOCCTR to 6 alphanumerical.
 	public void correctLOCCTRformat(){
 		while(locctr.length() < 6)locctr = "0" + locctr;
 	}
@@ -176,7 +191,7 @@ public class Andreas {
 	}
 
 	//Creates the header record and returns it as a string.
-	public void printHeaderRecord(){
+	public void printHeaderRecord(AL assemblyLine){
 		String programName = assemblyLine.getLabel();
 		boolean shortened = false;
 		if (programName.equals(""))programName = "PROG  ";
@@ -206,7 +221,7 @@ public class Andreas {
 
 	//TODO: outOverview.close på slutten av Assembleren.
 	//Prints a line to the Overview text file.
-	public void printToOverviewFile(){
+	public void printToOverviewFile(AL assemblyLine){
 		try {
 			//OPEN FILE
 			if(outOverview == null) 
