@@ -69,7 +69,7 @@ public class Andreas {
 					else{
 						if(isSymbol(operand1))operand1 = findSymbolAddress(operand1);
 						if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
-						objectCode = makeObjectCode();
+						//objectCode = makeObjectCode();
 						
 					}
 					//WRITE TO TEXTRECORD

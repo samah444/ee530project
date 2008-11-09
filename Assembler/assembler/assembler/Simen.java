@@ -63,7 +63,7 @@ public class Simen {
 		String s = Integer.toHexString(i);
 		return s;
 	}
-
+	//Fills the SymTab with the register addresses.
 	public void fillSymTabWithRegisters(){
 		String[] regName = {"A", "X", "L", "B", "S", "T", "F", "PC", "SW"};
 		String[] value = {"0", "1", "2", "3", "4", "5", "6", "8", "9"}; 
