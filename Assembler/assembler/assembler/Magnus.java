@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
+import java.util.ListIterator;
 
 public class Magnus {
 
 	private ALStream alstr;
 	private AL assemblyLine;
+	private AL interMediateAssemblyLine;
+	private ListIterator<InterMediateLine> iter;
 	private Integer disp = 0;
 	private Boolean baseFlag;
 	private String startAddress, programLength, locctr, targetAddress, base;
@@ -72,6 +75,8 @@ public class Magnus {
 			while(startAddress.length() < 6) startAddress = "0" + startAddress;
 
 			locctr = intToHex((Integer.parseInt(startAddress)));
+			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+			intermediateLines.add(currentInterMediateLine);
 			assemblyLine = alstr.nextAL();
 		}
 		else locctr = "000000";
@@ -184,11 +189,16 @@ public class Magnus {
 				b="0";
 
 				//			getting the PC from next lines locctr then resetting the locctr
-				AL tempAssemblyLine = alstr.nextAL();
+				
 				tempLocctr = locctr;
-				correctLOCCTR(tempAssemblyLine);
+				
+				InterMediateLine currentInterMediateLine = iter.next();
+				interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
+				locctr = currentInterMediateLine.getLocctr();
+				
 				programCounter = locctr;
-
+				
+				currentInterMediateLine = iter.previous();
 				locctr = tempLocctr;	
 
 				//			setting disp for PC-relative(=TA-PC)
