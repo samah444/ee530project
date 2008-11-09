@@ -75,8 +75,10 @@ public class Magnus {
 			while(startAddress.length() < 6) startAddress = "0" + startAddress;
 
 			locctr = intToHex((Integer.parseInt(startAddress)));
+			
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 			intermediateLines.add(currentInterMediateLine);
+			
 			assemblyLine = alstr.nextAL();
 		}
 		else locctr = "000000";
