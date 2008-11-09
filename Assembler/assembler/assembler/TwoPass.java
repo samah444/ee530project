@@ -26,6 +26,7 @@ public class TwoPass
 	private String objectCodeString = "";
 	private int lengthOfTextRec = 0;
 	private String startAddress;
+	private String targetAddress;
 	private String programLength;
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 
@@ -160,8 +161,10 @@ public class TwoPass
 //	Makes object code
 	public String makeObjectCode() throws IOException{
 
-		String objectCode, opCodeValue, programCounter, base, targetAddress, disp, x="0", b="0", p="0", e="0";
-
+		String objectCode, opCodeValue, programCounter, base, disp, x="0", b="0", p="0", e="0";
+		
+		String operand1 = interMediateAssemblyLine.getOperand1();
+		String operand2 = interMediateAssemblyLine.getOperand2();
 		//		get value of mnemonic in optable
 
 		OpCode tempOpCode = new OpCode(assemblyLine.getOpmnemonic());
@@ -499,6 +502,9 @@ public class TwoPass
 
 		//		TA=(PC)+ disp 
 		//		Program-counter relative b=0,p=1
+		
+		String operand1 = interMediateAssemblyLine.getOperand1();
+		targetAddress = operand1;
 
 		if ((-2048 <= Integer.parseInt(targetAddress, 16) && Integer.parseInt(targetAddress, 16) <= 2047))
 			return true;
