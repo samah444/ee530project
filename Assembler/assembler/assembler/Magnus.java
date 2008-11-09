@@ -3,6 +3,7 @@ package assembler;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 
@@ -15,6 +16,7 @@ public class Magnus {
 	private String startAddress, programLength, locctr, targetAddress, base;
 	private HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	private String operand1, operand2;
+	private ArrayList<InterMediateLine> intermediateLines = new ArrayList<InterMediateLine>();
 
 	Boolean isPCPossible(){
 		//		When program-counter relative mode is used, disp
@@ -62,6 +64,7 @@ public class Magnus {
 	public void passOne(){
 
 		assemblyLine = alstr.nextAL();
+		
 
 		if (assemblyLine.getOpmnemonic() == "START"){
 
@@ -72,8 +75,13 @@ public class Magnus {
 			assemblyLine = alstr.nextAL();
 		}
 		else locctr = "000000";
+		
+		
+		
 		while(!alstr.atEnd()){
-
+			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+			intermediateLines.add(currentInterMediateLine);
+			
 			if(!assemblyLine.isFullComment()){
 				if(assemblyLine.getLabel() != ""){
 					if(symTab.containsKey(assemblyLine.getLabel())){
@@ -90,6 +98,7 @@ public class Magnus {
 				}
 				//				else throw new InvalidOpcode;
 			}
+			
 			assemblyLine = alstr.nextAL();
 		}
 		String programLength = hexMath(locctr, '-' ,startAddress);
@@ -242,5 +251,14 @@ public class Magnus {
 		if (aSymbol == null){return "";}//TODO: Throw undefined Symbol exception. Set error flag?
 		else return aSymbol.getAddress();	
 	}
+//	public void makeAlToArrayList(){
+//		ArrayList assemblyLines = new ArrayList();
+//		while(!alstr.atEnd()){
+//			assemblyLine = alstr.nextAL();
+//			correctLOCCTR(assemblyLine);
+//			assemblyLines.add(Integer.parseInt(locctr), assemblyLine)
+//		}
+//		
+//	}
 
 }
