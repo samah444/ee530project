@@ -165,96 +165,208 @@ public class TwoPass
 	//	Makes object code
 	public String makeObjectCode() throws IOException{
 
-		String objectCode, opCodeValue, programCounter, base, disp, x="0", b="0", p="0", e="0";
+		String objectCode = "000000", flagHex, opCodeValue, programCounter, base, disp ="000", x="0", b="0", p="0", e="0";
 
-		//String operand1 = interMediateAssemblyLine.getOperand1();
-		//String operand2 = interMediateAssemblyLine.getOperand2();
 		//		get value of mnemonic in optable
-
 		OpCode tempOpCode = optab.getOpCode(interMediateAssemblyLine.getOpmnemonic());
 		opCodeValue = optab.lookup_AsHex(interMediateAssemblyLine.getOpmnemonic());
 
 		//		get value of targetAddress(TA)
 		targetAddress = operand1;
 
+//		FORMAT 1------------------------------START------------------------------------------
+		
+		if (tempOpCode.getFormat() == 1){
+			while (opCodeValue.length() < 2) opCodeValue = "0" + opCodeValue;
+			objectCode = opCodeValue;
+		}
+//		FORMAT 1------------------------------END--------------------------------------------
+		
+//		FORMAT 2------------------------------START------------------------------------------
+		
 		if (tempOpCode.getFormat() == 2){
-			opCodeValue = hexMath(opCodeValue, '+', "3");
 			while (opCodeValue.length() < 2) opCodeValue = "0" + opCodeValue;
 			if(operand1 == "") operand1 = "0";
 			if(operand2 == "") operand2 = "0";
 			objectCode = opCodeValue + operand1 + operand2;
 		}
-
-		else{
-			//		check indirect and immediate
-			if(assemblyLine.isIndirect() && !assemblyLine.isImmediate())	
-				opCodeValue = hexMath(opCodeValue, '+', "2");
-
-			else if(!assemblyLine.isIndirect() && assemblyLine.isImmediate())
-				opCodeValue = hexMath(opCodeValue, '+', "1");
-
-			else opCodeValue = hexMath(opCodeValue, '+', "3");
-
-			//		check index
-			if(assemblyLine.isIndexed())
-				x="1";
-
-			//		check if pcPossible and if true, get PC
-			if(isPCPossible()){
+//		FORMAT 2------------------------------END--------------------------------------------
+		
+//		FORMAT 3 & 4 --------------------START-----------------------------------------------
+		
+		// SIMPLE ADDRESSING------------START------------------------------------------------
+		if(assemblyLine.isIndirect() && assemblyLine.isImmediate()){
+			if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+				disp = targetAddress;
+				while(disp.length() < 3) disp = "0" + disp;
+			}				
+			if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && assemblyLine.isExtended()){
+				e="1";
+				disp = targetAddress;
+				while(disp.length() < 5) disp = "0" + disp;
+			}
+			if(!assemblyLine.isIndexed() && !isBasePossible() && isPCPossible() && !assemblyLine.isExtended()){
 				p="1";
-				b="0";
-
-				//			getting the PC from next lines locctr then resetting the locctr
-
-
-
+				
+//				Setting the ProgramCounter with locctr and adding bytes of operation
 				InterMediateLine currentInterMediateLine = iter.next();
 				interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
 				programCounter = currentInterMediateLine.getLocctr();				
 
 				currentInterMediateLine = iter.previous();	
 
-				//			setting disp for PC-relative(=TA-PC)
+				//	setting disp for PC-relative(=TA-PC)
 				disp = hexMath(targetAddress, '-', programCounter);
 				while (disp.length() < 3) disp = "0" + disp;
 			}
-
-			//		check if basePossible and if true, get basevalue
-			else if (isBasePossible()){
-				p="0";
+			if(!assemblyLine.isIndexed() && isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
 				b="1";
-
-				//			get basevalue
+				//	get basevalue
 				base = this.base;
 
-				//			setting disp for base-relative(=TA-BASE)
+				//	setting disp for base-relative(=TA-BASE)
 				disp = hexMath(targetAddress, '-', base);
 				while (disp.length() < 3) disp = "0" + disp;
-
 			}
-			else {
-				p="0";
-				b="0";
+			if(assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+				x="1";
 				disp = targetAddress;
+				while (disp.length() < 3) disp = "0" + disp;
 			}
-			//		check if extended
-			if(assemblyLine.isExtended()){
+			if(assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && assemblyLine.isExtended()){
+				x="1"; e="1";
+				disp = targetAddress;
+				while(disp.length() < 5) disp = "0" + disp;
+			}
+			if(assemblyLine.isIndexed() && !isBasePossible() && isPCPossible() && !assemblyLine.isExtended()){
+				x="1"; p="1";
+				
+//				Setting the ProgramCounter with locctr and adding bytes of operation
+				InterMediateLine currentInterMediateLine = iter.next();
+				interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
+				programCounter = currentInterMediateLine.getLocctr();				
+
+				currentInterMediateLine = iter.previous();	
+
+				//	setting disp for PC-relative(=TA-PC)
+				disp = hexMath(targetAddress, '-', programCounter);
+				while (disp.length() < 3) disp = "0" + disp;
+			}
+			if(assemblyLine.isIndexed() && isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+				x="1"; b="1";
+				//	get basevalue
+				base = this.base;
+
+				//	setting disp for base-relative(=TA-BASE)
+				disp = hexMath(targetAddress, '-', base);
+				while (disp.length() < 3) disp = "0" + disp;
+			}
+			opCodeValue = hexMath(opCodeValue, '+', "3");
+			while (opCodeValue.length() < 2) opCodeValue = "0" + opCodeValue;
+			
+			flagHex = x + b + p + e;
+			objectCode = opCodeValue + Integer.toHexString(Integer.parseInt(flagHex, 2)) + disp;
+		}
+		if(!assemblyLine.isIndexed() && !assemblyLine.isImmediate()){
+			if(assemblyLine.isIndexed())
+				x="1";
+				disp = targetAddress;
+			if(!assemblyLine.isIndexed())
+				disp = targetAddress;
+			
+			flagHex = x + b + p + e;
+			objectCode = opCodeValue + Integer.toHexString(Integer.parseInt(flagHex, 2)) + disp;			
+		}
+//		SIMPLE ADDRESSING----------------END---------------------------------------
+		
+//		INDIRECT ADDRESSING--------------START-------------------------------------
+		
+		if(assemblyLine.isIndirect() && !assemblyLine.isImmediate()){
+			if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+				disp = targetAddress;
+				while(disp.length() < 3) disp = "0" + disp;
+			}				
+			if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && assemblyLine.isExtended()){
 				e="1";
 				disp = targetAddress;
-				while (disp.length() < 5) disp = "0" + disp;	
+				while(disp.length() < 5) disp = "0" + disp;
 			}
+			if(!assemblyLine.isIndexed() && !isBasePossible() && isPCPossible() && !assemblyLine.isExtended()){
+				p="1";
+				
+//				Setting the ProgramCounter with locctr and adding bytes of operation
+				InterMediateLine currentInterMediateLine = iter.next();
+				interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
+				programCounter = currentInterMediateLine.getLocctr();				
 
+				currentInterMediateLine = iter.previous();	
 
-			String flagHex = x+b+p+e; 
-			int i= Integer.parseInt(flagHex,2);
-			flagHex = Integer.toHexString(i);
+				//	setting disp for PC-relative(=TA-PC)
+				disp = hexMath(targetAddress, '-', programCounter);
+				while (disp.length() < 3) disp = "0" + disp;
+			}
+			if(!assemblyLine.isIndexed() && isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+				b="1";
+				//	get basevalue
+				base = this.base;
 
-			//		make objectcode
+				//	setting disp for base-relative(=TA-BASE)
+				disp = hexMath(targetAddress, '-', base);
+				while (disp.length() < 3) disp = "0" + disp;
+			}
+			opCodeValue = hexMath(opCodeValue, '+', "2");
 			while (opCodeValue.length() < 2) opCodeValue = "0" + opCodeValue;
-
-			objectCode = opCodeValue + flagHex + disp;
+			
+			flagHex = x + b + p + e;
+			objectCode = opCodeValue + Integer.toHexString(Integer.parseInt(flagHex, 2)) + disp;
 		}
+//		INDIRECT ADDRESSING----------------------END----------------------------------
+		
+//		IMMEDIATE ADDRESING---------------------START---------------------------------
+		
+		if(!assemblyLine.isIndirect() && assemblyLine.isImmediate()){
+			if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+				disp = targetAddress;
+				while(disp.length() < 3) disp = "0" + disp;
+			}				
+			if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && assemblyLine.isExtended()){
+				e="1";
+				disp = targetAddress;
+				while(disp.length() < 5) disp = "0" + disp;
+			}
+			if(!assemblyLine.isIndexed() && !isBasePossible() && isPCPossible() && !assemblyLine.isExtended()){
+				p="1";
+				
+//				Setting the ProgramCounter with locctr and adding bytes of operation
+				InterMediateLine currentInterMediateLine = iter.next();
+				interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
+				programCounter = currentInterMediateLine.getLocctr();				
 
+				currentInterMediateLine = iter.previous();	
+
+				//	setting disp for PC-relative(=TA-PC)
+				disp = hexMath(targetAddress, '-', programCounter);
+				while (disp.length() < 3) disp = "0" + disp;
+			}
+			if(!assemblyLine.isIndexed() && isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+				b="1";
+				//	get basevalue
+				base = this.base;
+
+				//	setting disp for base-relative(=TA-BASE)
+				disp = hexMath(targetAddress, '-', base);
+				while (disp.length() < 3) disp = "0" + disp;
+			}
+			opCodeValue = hexMath(opCodeValue, '+', "1");
+			while (opCodeValue.length() < 2) opCodeValue = "0" + opCodeValue;
+			
+			flagHex = x + b + p + e;
+			objectCode = opCodeValue + Integer.toHexString(Integer.parseInt(flagHex, 2)) + disp;
+		}
+//		IMMEDIATE ADDRESSING-------------------END-------------------------------------------
+		
+//		FORMAT 3 & 4 --------------------END-------------------------------------------------
+		
 		return objectCode;
 	}
 
