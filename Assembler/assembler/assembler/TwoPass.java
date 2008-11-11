@@ -487,16 +487,32 @@ public class TwoPass
 	}
 
 	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
+//	public String constantToHex(String constant){
+//		int decContent = 0;
+//		char[] byteContent = constant.toCharArray();
+//		String hex = "";
+//		for(int i = 2; i<constant.length()-1; i++){
+//			decContent = (int)(byteContent[i]);
+//			hex += intToHex(decContent);
+//		}
+//		return hex;
+//	}
+	
 	public String constantToHex(String constant){
 		int decContent = 0;
+		String content = "";
 		char[] byteContent = constant.toCharArray();
 		String hex = "";
 		for(int i = 2; i<constant.length()-1; i++){
+			content += byteContent[i];
 			decContent = (int)(byteContent[i]);
+			//if(byteContent[0]=='C') hex += intToHex(decContent);
 			hex += intToHex(decContent);
 		}
-		return hex;
+		if(byteContent[0]=='C') return hex;
+		else return content;
 	}
+
 
 	//Creates the header record and prints it to file.
 	public void printHeaderRecord(AL assemblyLine){
