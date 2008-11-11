@@ -14,6 +14,23 @@ public class Simen {
 	private String objectCodeString;
 	private AL interMediateAssemblyLine;
 	
+	public void writeReferRec(){
+		printToRecord("\nR");
+		int length = 0;
+		String operand = interMediateAssemblyLine.getOperand1();
+		while(true){
+			int index = operand.indexOf(',');
+			String symbol = operand.substring(0, index);
+			while(symbol.length()<6) symbol += " ";
+			printToRecord(symbol);
+			length++;
+			if(length==12) printToRecord("\nR");
+			
+			operand = operand.substring(index+1);
+			if(index==-1) break;
+		}
+	}
+
 	public void writeDefineRec(AL interMediateAssemblyLine){
 		
 		printToRecord("\nD");
@@ -33,9 +50,6 @@ public class Simen {
 			operand = operand.substring(index+1);
 			if(index==-1) break;
 		}
-	}
-	
-	public void writeReferRec(){
 	}
 	
 	public void fixLengthInTextRecord(){
