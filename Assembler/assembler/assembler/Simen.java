@@ -24,8 +24,10 @@ public class Simen {
 			while(symbol.length()<6) symbol += " ";
 			printToRecord(symbol);
 			length++;
-			if(length==12) printToRecord("\nR");
-			
+			if(length==12) {
+				printToRecord("\nR");
+				length = 0;
+			}			
 			operand = operand.substring(index+1);
 			if(index==-1) break;
 		}
@@ -45,7 +47,10 @@ public class Simen {
 			printToRecord(symbol + address);
 			length++;
 			
-			if(length==6) printToRecord("\nD");
+			if(length==6){ 
+				printToRecord("\nD");
+				length = 0;
+			}
 			
 			operand = operand.substring(index+1);
 			if(index==-1) break;
