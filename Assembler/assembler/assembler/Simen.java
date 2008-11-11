@@ -12,6 +12,39 @@ public class Simen {
 	private BufferedWriter outRecord;
 	private int lengthOfTextRec;
 	private String objectCodeString;
+	private AL interMediateAssemblyLine;
+	
+	public void writeDefineRec(AL interMediateAssemblyLine){
+		printToRecord("\nD");
+		int length = 1;
+		String operand = interMediateAssemblyLine.getOperand1();
+		while(true){
+			int index = operand.indexOf(',');
+			String symbol = operand.substring(0, index);
+			String address = symTab.get(symbol).getAddress();
+			if(address=)
+			if(symbol.length()<7) symbol += " ";
+			printToRecord(symbol + address);
+			
+			
+			operand = operand.substring(index+1);
+			if(index==-1) break;
+		}
+		//String word = operand.substring(0, operand.indexOf(','));
+		
+		
+		
+		char[] katt = hond.toCharArray();
+		for(int i = 0; i<katt.length; i++){
+			if(katt[i]==katt[',']){
+				
+			}
+		}
+		
+		
+	}
+	public void writeReferRec(){
+	}
 	
 	public void fixLengthInTextRecord(){
 		char[] objectCodeArray = objectCodeString.toCharArray();
@@ -47,13 +80,17 @@ public class Simen {
 	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
 	public String constantToHex(String constant){
 		int decContent = 0;
+		String content = "";
 		char[] byteContent = constant.toCharArray();
 		String hex = "";
 		for(int i = 2; i<constant.length()-1; i++){
-			decContent = Integer.parseInt("" + byteContent[i]);
+			content += byteContent[i];
+			decContent = Integer.parseInt("" + content);
+			//if(byteContent[0]=='C') hex += intToHex(decContent);
 			hex += intToHex(decContent);
 		}
-		return hex;
+		if(byteContent[0]=='C') return hex;
+		else return content;
 	}
 
 	public static String intToHex(int inputFromUser){
