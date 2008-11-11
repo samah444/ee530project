@@ -15,17 +15,20 @@ public class Simen {
 	private AL interMediateAssemblyLine;
 	
 	public void writeDefineRec(AL interMediateAssemblyLine){
+		
 		printToRecord("\nD");
-		int length = 1;
+		int length = 0;
 		String operand = interMediateAssemblyLine.getOperand1();
 		while(true){
 			int index = operand.indexOf(',');
 			String symbol = operand.substring(0, index);
 			String address = symTab.get(symbol).getAddress();
-			if(address=)
-			if(symbol.length()<7) symbol += " ";
+			while(address.length()<6) address = "0" + address;
+			while(symbol.length()<6) symbol += " ";
 			printToRecord(symbol + address);
+			length++;
 			
+			if(length==6) printToRecord("\nD");
 			
 			operand = operand.substring(index+1);
 			if(index==-1) break;
