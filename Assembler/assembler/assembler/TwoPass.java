@@ -178,6 +178,7 @@ public class TwoPass
 
 		//		FORMAT 1------------------------------START------------------------------------------
 
+		//		Format 1 only has 1 byte, 2 hexcharacters, the opcodeValue
 		if (tempOpCode.getFormat() == 1){
 			while (opCodeValue.length() < 2) opCodeValue = "0" + opCodeValue;
 			objectCode = opCodeValue;
@@ -186,6 +187,7 @@ public class TwoPass
 
 		//		FORMAT 2------------------------------START------------------------------------------
 
+		//		Format 2 has 2 bytes, the opcodevalue and the value of r1 and r1
 		if (tempOpCode.getFormat() == 2){
 			while (opCodeValue.length() < 2) opCodeValue = "0" + opCodeValue;
 			if(operand1.equals("")) operand1 = "0";
@@ -196,19 +198,18 @@ public class TwoPass
 
 		//		FORMAT 3 & 4 --------------------START-----------------------------------------------
 
-		// SIMPLE ADDRESSING------------START------------------------------------------------
+		//		FORMAT 3 and 4 has 3 different main addressing modes. Simple, which contains the combination
+		//		of the four different options indexed, base, pc or extended(or a combination), indirect which
+		//		the same 4 cominations, but has the indirect flag raised, and the immediate not, and the 
+		//		immediate, which also has the 4 flags, but the immediateflag is raised, and the indirect not.
+		//		These 3 different modes decides what number will be added to the opcodevalue in the objectCode.
+		//		The combos of the 4 flags x, b, p and e decides the 3 character of the opcode.
+
+		// 		SIMPLE ADDRESSING------------START---------------------------------------------------
 		if(tempOpCode.getFormat() == 3 || tempOpCode.getFormat() == 4){
 			if(!assemblyLine.isIndirect() && !assemblyLine.isImmediate()){
-				if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
-					disp = targetAddress;
-					while(disp.length() < 3) disp = "0" + disp;
-				}
-				else if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && assemblyLine.isExtended()){
-					e="1";
-					disp = targetAddress;
-					while(disp.length() < 5) disp = "0" + disp;
-				}
-				else if(!assemblyLine.isIndexed() && isPCPossible() && !assemblyLine.isExtended()){
+
+				if(!assemblyLine.isIndexed() && isPCPossible() && !assemblyLine.isExtended()){
 					p="1";
 
 					//				Setting the ProgramCounter which is locctr at next line
@@ -218,14 +219,19 @@ public class TwoPass
 
 					currentInterMediateLine = iter.previous();	
 					if(targetAddress.equals(""))targetAddress = "0";
-					//	setting disp for PC-relative(=TA-PC)
-					
-					
+					//	setting disp for PC-relative(=TA-PC)					
 					disp = hexMath(targetAddress, '-', programCounter);
-					
 					if(disp.length() > 3) disp = disp.substring(disp.length() - 3);
-					
 					while (disp.length() < 3) disp = "0" + disp;
+				}				
+				else if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+					disp = targetAddress;
+					while(disp.length() < 3) disp = "0" + disp;
+				}
+				else if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && assemblyLine.isExtended()){
+					e="1";
+					disp = targetAddress;
+					while(disp.length() < 5) disp = "0" + disp;
 				}
 				else if(!assemblyLine.isIndexed() && isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
 					b="1";
@@ -236,7 +242,7 @@ public class TwoPass
 					disp = hexMath(targetAddress, '-', base);
 					while (disp.length() < 3) disp = "0" + disp;
 				}
-				else if(assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+				if(assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
 					x="1";
 					disp = targetAddress;
 					while (disp.length() < 3) disp = "0" + disp;
@@ -270,6 +276,7 @@ public class TwoPass
 					disp = hexMath(targetAddress, '-', base);
 					while (disp.length() < 3) disp = "0" + disp;
 				}
+
 				opCodeValue = hexMath(opCodeValue, '+', "3");
 				while (opCodeValue.length() < 2) opCodeValue = "0" + opCodeValue;
 
@@ -293,30 +300,29 @@ public class TwoPass
 			//		INDIRECT ADDRESSING--------------START-------------------------------------
 
 			if(assemblyLine.isIndirect() && !assemblyLine.isImmediate()){
-				if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
-					disp = targetAddress;
-					while(disp.length() < 3) disp = "0" + disp;
-				}				
-				else if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && assemblyLine.isExtended()){
-					e="1";
-					disp = targetAddress;
-					while(disp.length() < 5) disp = "0" + disp;
-				}
-				else if(!assemblyLine.isIndexed() && isPCPossible() && !assemblyLine.isExtended()){
-									
+				if(!assemblyLine.isIndexed() && isPCPossible() && !assemblyLine.isExtended()){
 					p="1";
 
-					//				Setting the ProgramCounter with locctr and adding bytes of operation
+					//				Setting the ProgramCounter which is locctr at next line
 					InterMediateLine currentInterMediateLine = iter.next();
 					interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
 					programCounter = currentInterMediateLine.getLocctr();				
 
 					currentInterMediateLine = iter.previous();	
-
-					//	setting disp for PC-relative(=TA-PC)
+					if(targetAddress.equals(""))targetAddress = "0";
+					//	setting disp for PC-relative(=TA-PC)					
 					disp = hexMath(targetAddress, '-', programCounter);
 					if(disp.length() > 3) disp = disp.substring(disp.length() - 3);
 					while (disp.length() < 3) disp = "0" + disp;
+				}				
+				else if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+					disp = targetAddress;
+					while(disp.length() < 3) disp = "0" + disp;
+				}
+				else if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && assemblyLine.isExtended()){
+					e="1";
+					disp = targetAddress;
+					while(disp.length() < 5) disp = "0" + disp;
 				}
 				else if(!assemblyLine.isIndexed() && isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
 					b="1";
@@ -338,7 +344,29 @@ public class TwoPass
 			//		IMMEDIATE ADDRESING---------------------START---------------------------------
 
 			if(!assemblyLine.isIndirect() && assemblyLine.isImmediate()){
-				if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
+				
+				if(!assemblyLine.isIndexed() && isPCPossible() && !assemblyLine.isExtended()){
+
+
+					//				Setting the ProgramCounter with locctr and adding bytes of operation
+					InterMediateLine currentInterMediateLine = iter.next();
+					interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
+					programCounter = currentInterMediateLine.getLocctr();				
+
+					currentInterMediateLine = iter.previous();	
+
+					if(Integer.parseInt(targetAddress, 16) > Integer.parseInt(programCounter, 16)){
+
+						//	setting disp for PC-relative(=TA-PC)
+						p="1";
+						disp = hexMath(targetAddress, '-', programCounter);
+						if(disp.length() > 3) disp = disp.substring(disp.length() - 3);
+					}
+					else disp = targetAddress;
+					while (disp.length() < 3) disp = "0" + disp;
+				}
+				
+				else if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
 					disp = targetAddress;
 					while(disp.length() < 3) disp = "0" + disp;
 				}				
@@ -347,26 +375,7 @@ public class TwoPass
 					disp = intToHex(Integer.parseInt(targetAddress));
 					while(disp.length() < 5) disp = "0" + disp;
 				}
-				else if(!assemblyLine.isIndexed() && isPCPossible() && !assemblyLine.isExtended()){
-					
 
-					//				Setting the ProgramCounter with locctr and adding bytes of operation
-					InterMediateLine currentInterMediateLine = iter.next();
-					interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
-					programCounter = currentInterMediateLine.getLocctr();				
-
-					currentInterMediateLine = iter.previous();	
-					
-					if(Integer.parseInt(targetAddress, 16) > Integer.parseInt(programCounter, 16)){
-
-					//	setting disp for PC-relative(=TA-PC)
-					p="1";
-					disp = hexMath(targetAddress, '-', programCounter);
-					if(disp.length() > 3) disp = disp.substring(disp.length() - 3);
-					}
-					else disp = targetAddress;
-					while (disp.length() < 3) disp = "0" + disp;
-				}
 				else if(!assemblyLine.isIndexed() && isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
 					b="1";
 					//	get basevalue
@@ -385,10 +394,10 @@ public class TwoPass
 			//		IMMEDIATE ADDRESSING-------------------END-------------------------------------------
 		}
 		//		FORMAT 3 & 4 --------------------END-------------------------------------------------
-
-		return objectCode;
+		if (objectCode.equals("000000"))return "";
+		else return objectCode;
 	}
-
+	
 	public String hexMath(String hex1, char operator, String hex2){
 		if (operator=='+'){
 			int i1= Integer.parseInt(hex1,16);
@@ -487,17 +496,17 @@ public class TwoPass
 	}
 
 	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
-//	public String constantToHex(String constant){
-//		int decContent = 0;
-//		char[] byteContent = constant.toCharArray();
-//		String hex = "";
-//		for(int i = 2; i<constant.length()-1; i++){
-//			decContent = (int)(byteContent[i]);
-//			hex += intToHex(decContent);
-//		}
-//		return hex;
-//	}
-	
+	//	public String constantToHex(String constant){
+	//		int decContent = 0;
+	//		char[] byteContent = constant.toCharArray();
+	//		String hex = "";
+	//		for(int i = 2; i<constant.length()-1; i++){
+	//			decContent = (int)(byteContent[i]);
+	//			hex += intToHex(decContent);
+	//		}
+	//		return hex;
+	//	}
+
 	public String constantToHex(String constant){
 		int decContent = 0;
 		String content = "";
@@ -674,13 +683,13 @@ public class TwoPass
 		String programCounter = currentInterMediateLine.getLocctr();				
 
 		currentInterMediateLine = iter.previous();	
-		
+
 		String targetAddress = this.targetAddress;
 		String disp;
 		int check;
-		
+
 		if(targetAddress.equals(""))targetAddress = "0";
-		
+
 		if(Integer.parseInt(targetAddress, 16) < Integer.parseInt(programCounter, 16)){
 			disp = hexMath(programCounter, '-', targetAddress);
 			check = Integer.parseInt(disp, 16);
@@ -702,19 +711,19 @@ public class TwoPass
 		//		TA=(B)+disp
 		//		Base relative b=1,p=0 
 		if (baseFlag){
-		targetAddress = operand1;
-		if(targetAddress.equals(""))targetAddress = "0";
-		String base = this.base;
-		
-		//	setting disp for base-relative(=TA-BASE)
-		String disp = hexMath(targetAddress, '-', base);
-		int check;
-		try{
-		check = Integer.parseInt(disp, 16);}
-		catch (NumberFormatException e) {return false;}
-		if((0 <= check) && (check <=4095))
-			return true;
-		else return false;
+			targetAddress = operand1;
+			if(targetAddress.equals(""))targetAddress = "0";
+			String base = this.base;
+
+			//	setting disp for base-relative(=TA-BASE)
+			String disp = hexMath(targetAddress, '-', base);
+			int check;
+			try{
+				check = Integer.parseInt(disp, 16);}
+			catch (NumberFormatException e) {return false;}
+			if((0 <= check) && (check <=4095))
+				return true;
+			else return false;
 		}
 		return false;
 	}
