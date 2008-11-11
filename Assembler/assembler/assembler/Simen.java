@@ -33,19 +33,8 @@ public class Simen {
 			operand = operand.substring(index+1);
 			if(index==-1) break;
 		}
-		//String word = operand.substring(0, operand.indexOf(','));
-		
-		
-		
-		char[] katt = hond.toCharArray();
-		for(int i = 0; i<katt.length; i++){
-			if(katt[i]==katt[',']){
-				
-			}
-		}
-		
-		
 	}
+	
 	public void writeReferRec(){
 	}
 	
