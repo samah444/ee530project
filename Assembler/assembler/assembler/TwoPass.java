@@ -98,7 +98,7 @@ public class TwoPass
 
 			assemblyLine = alstr.nextAL();
 		}
-		String programLength = hexMath(locctr, '-' ,startAddress);
+		programLength = hexMath(locctr, '-' ,startAddress);
 		while(programLength.length() < 6) programLength = "0" + programLength;
 	}
 
@@ -464,7 +464,7 @@ public class TwoPass
 
 	//Creates the end record and prints it to file.
 	public void printEndRecord(){
-		printToRecord("E" + startAddress);
+		printToRecord("\nE" + startAddress);
 	}
 
 	//Returns true if operand is a Symbol, false otherwise.
