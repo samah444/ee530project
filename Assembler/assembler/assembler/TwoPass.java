@@ -32,9 +32,11 @@ public class TwoPass
 	private String programLength = "000000";
 	private HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	private HashMap<String, Literal> litTab = new HashMap<String, Literal>();
-	String operand1;
-	String operand2;
-	String objectCode = "";
+	private String operand1;
+	private String operand2;
+	private String objectCode = "";
+	private boolean ltorg = false;
+	private String ltorgLOCCTR = "";
 
 
 	public TwoPass(OpTable opt, ALStream alstream)
@@ -46,7 +48,7 @@ public class TwoPass
 		// successive elements of ALStream object
 
 		// i.e.  Y O U R  C O D E ! ! ! !
-		
+
 		firstPass();
 		fillSymTabWithRegisters();
 		secondPass();
@@ -99,20 +101,20 @@ public class TwoPass
 
 			assemblyLine = alstr.nextAL();
 		}
-		
+
 		litIter = litTab.keySet().iterator();
-		
+
 		while(litIter.hasNext()){
 			String litIterString = litIter.next();
 			Literal tempLit = litTab.get(litIterString);
-	
+
 			if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
-			
+
 			litTab.put(litIterString , tempLit);
-			
+
 			hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));	
 		}
-		
+
 		InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 		intermediateLines.add(currentInterMediateLine);
 		programLength = hexMath(locctr, '-' ,startAddress);
@@ -129,69 +131,75 @@ public class TwoPass
 			locctr = currentInterMediateLine.getLocctr();
 			assemblyLine = alstr.nextAL();
 			//IF OPCODE IS NOT END
-			if(!interMediateAssemblyLine.getOpmnemonic().equals("END")){
-				if(interMediateAssemblyLine.getOpmnemonic().equals("EXTREF"))writeReferRec();
-				else if(interMediateAssemblyLine.getOpmnemonic().equals("EXTDEF"))writeDefineRec();
-				else{
-					operand1 = interMediateAssemblyLine.getOperand1();
-					operand2 = interMediateAssemblyLine.getOperand2();
-					if(interMediateAssemblyLine.getOpmnemonic().equals("START")){
-						printHeaderRecord(interMediateAssemblyLine);
-						initializeTextRecord();
-					}
-					//IF COMMENT
-					else if(interMediateAssemblyLine.isFullComment()){}
-					//IF NOT COMMENT
+			if(!interMediateAssemblyLine.getOpmnemonic().equals("LTORG")){
+				if(!interMediateAssemblyLine.getOpmnemonic().equals("END")){
+					if(interMediateAssemblyLine.getOpmnemonic().equals("EXTREF"))writeReferRec();
+					else if(interMediateAssemblyLine.getOpmnemonic().equals("EXTDEF"))writeDefineRec();
 					else{
-						//SEARCHES FOR "BASE" AND SETS IT, IF FOUND.
-						searchAndProcessBase(interMediateAssemblyLine);
-						//SEARCHES FOR SYMBOLS, LITERALS and '*' IN OPERANDS AND REPLACE
-						replaceOperands();
-						//IF BYTE OR WORD
-						if(interMediateAssemblyLine.getOpmnemonic().equals("BYTE")
-								|| (interMediateAssemblyLine.getOpmnemonic().equals("WORD"))){
-							objectCode = constantToHex(interMediateAssemblyLine.getOperand1());
+						operand1 = interMediateAssemblyLine.getOperand1();
+						operand2 = interMediateAssemblyLine.getOperand2();
+						if(interMediateAssemblyLine.getOpmnemonic().equals("START")){
+							printHeaderRecord(interMediateAssemblyLine);
+							initializeTextRecord();
 						}
-						//IF NOT BYTE OR WORD
+						//IF COMMENT
+						else if(interMediateAssemblyLine.isFullComment()){}
+						//IF NOT COMMENT
 						else{
-							try {
-								objectCode = makeObjectCode(interMediateAssemblyLine);
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+							//SEARCHES FOR "BASE" AND SETS IT, IF FOUND.
+							searchAndProcessBase(interMediateAssemblyLine);
+							//SEARCHES FOR SYMBOLS, LITERALS and '*' IN OPERANDS AND REPLACE
+							replaceOperands();
+							//IF BYTE OR WORD
+							if(interMediateAssemblyLine.getOpmnemonic().equals("BYTE")
+									|| (interMediateAssemblyLine.getOpmnemonic().equals("WORD"))){
+								objectCode = constantToHex(interMediateAssemblyLine.getOperand1());
 							}
-						}
-						//WRITE TO TEXTRECORD
-						if((fitIntoTextRec(objectCode)) 
-								&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
-								&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESB")))
-							writeObjectCode(objectCode);
-						//IF OBJECTCODE DOESNT FIT INTO CURRENT TEXTRECORD OR OPERATOR IS RESW OR RESB
-						else {
-							if((!operand1.equals("1"))){
-								//	&& ((interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
-								//			|| (interMediateAssemblyLine.getOpmnemonic().equals("RESB")))){ 
-								fixLengthInTextRecord();
-								printToRecord(objectCodeString);
-								initializeTextRecord();
+							//IF NOT BYTE OR WORD
+							else{
+								try {
+									objectCode = makeObjectCode(interMediateAssemblyLine);
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 							}
-							writeObjectCode(objectCode);
+							//WRITE TO TEXTRECORD
+							if((fitIntoTextRec(objectCode)) 
+									&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
+									&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESB")))
+								writeObjectCode(objectCode);
+							//IF OBJECTCODE DOESNT FIT INTO CURRENT TEXTRECORD OR OPERATOR IS RESW OR RESB
+							else {
+								if((!operand1.equals("1"))){
+									//	&& ((interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
+									//			|| (interMediateAssemblyLine.getOpmnemonic().equals("RESB")))){ 
+									fixLengthInTextRecord();
+									printToRecord(objectCodeString);
+									initializeTextRecord();
+								}
+								writeObjectCode(objectCode);
+							}
 						}
 					}
 				}
+				//IF OPCODE = END
+				else {
+					if(ltorg == false)insertLiterals();
+					fixLengthInTextRecord();
+					printToRecord(objectCodeString);
+					printEndRecord();
+				}
+				//ALWAYS DO
+				interMediateAssemblyLine.setAssembledOpcode(objectCode);
+				printToOverviewFile(currentInterMediateLine);
 			}
-			//IF OPCODE = END
-			else {
-				fixLengthInTextRecord();
-				printToRecord(objectCodeString);
-				printEndRecord();
-			}
-			//ALWAYS DO
-			interMediateAssemblyLine.setAssembledOpcode(objectCode);
-			printToOverviewFile(currentInterMediateLine);
+			//IF OPMNEMONIC = LTORG
+			insertLiterals();
+			ltorg = true;
 		}
 	}
-	
+
 	public void searchLiterals(AL assemblyLine){
 		//		Searching for literans and adding to LITTAB if found
 		if(assemblyLine.getOperand1().toCharArray()[0] == '='){
@@ -207,20 +215,28 @@ public class TwoPass
 		else if(assemblyLine.getOpmnemonic().equals("LTORG")){
 
 			litIter = litTab.keySet().iterator();
-			
+
 			while(litIter.hasNext()){
 				String litIterString = litIter.next();
 				Literal tempLit = litTab.get(litIterString);
-				
+
 				if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
-				
+
 				litTab.put(litIterString , tempLit);
-				
+
 				hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));			
 			}
 		} 
 	}
-
+	public void insertLiterals(){
+		while(true){
+			litIter = litTab.keySet().iterator();
+			while(litIter.hasNext()){
+				String litIterString = litIter.next();
+				Literal tempLit = litTab.get(litIterString);
+			}
+		}
+	}
 	//	Makes object code
 	public String makeObjectCode(AL assemblyLine) throws IOException{
 
@@ -460,11 +476,17 @@ public class TwoPass
 	//Replaces operands according to SYMTAB,'*' and LITTAB.
 	public void replaceOperands(){
 		//OPERAND1
-		if(operand1.contains("="))operand1 = findLiteralAddress(operand1);
+		if(operand1.contains("=")){
+			operand1 = findLiteralAddress(operand1);
+			ltorg = false;
+		}
 		else if (operand1.equals("*"))operand1 = locctr;
 		else if (isSymbol(operand1))operand1 = findSymbolAddress(operand1);
 		//OPERAND2
-		if(operand2.contains("="))operand2 = findLiteralAddress(operand2);
+		if(operand2.contains("=")){
+			operand2 = findLiteralAddress(operand2);
+			ltorg = false;
+		}
 		else if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
 		else if(operand2.equals("*"))operand2 = locctr;
 	}
@@ -618,7 +640,7 @@ public class TwoPass
 		if (aSymbol == null){return "";}//TODO: Throw undefined Symbol exception. Set error flag?
 		else return aSymbol.getAddress();	
 	}
-	
+
 	public String findLiteralAddress(String operand){
 		Literal aLiteral = litTab.get(operand);
 		if(aLiteral == null){return "";}//TODO: Throw undefined Literal exception.?
@@ -753,6 +775,7 @@ public class TwoPass
 		}
 
 	}
+	
 
 	//Sets the LOCCTR to its correct position.
 	public void correctLOCCTR(AL assemblyLine){
