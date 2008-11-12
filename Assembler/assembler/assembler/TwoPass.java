@@ -113,50 +113,62 @@ public class TwoPass
 			assemblyLine = alstr.nextAL();
 			//IF OPCODE IS NOT END
 			if(!interMediateAssemblyLine.getOpmnemonic().equals("END")){
-				operand1 = interMediateAssemblyLine.getOperand1();
-				operand2 = interMediateAssemblyLine.getOperand2();
-				if(interMediateAssemblyLine.getOpmnemonic().equals("START")){
-					printHeaderRecord(interMediateAssemblyLine);
-					initializeTextRecord();
-				}
-				//IF COMMENT
-				if(interMediateAssemblyLine.isFullComment()){}
-				//IF NOT COMMENT
+				if(interMediateAssemblyLine.getOpmnemonic().equals("EXTREF"))writeReferRec();
+				else if(interMediateAssemblyLine.getOpmnemonic().equals("EXTDEF"))writeDefineRec();
 				else{
-					searchAndProcessBase(interMediateAssemblyLine);
-					//IF BYTE OR WORD
-					if(interMediateAssemblyLine.getOpmnemonic().equals("BYTE")
-							|| (interMediateAssemblyLine.getOpmnemonic().equals("WORD"))){
-						objectCode = constantToHex(interMediateAssemblyLine.getOperand1());
-					}
-					//IF NOT BYTE OR WORD
-					else{
-						if(isSymbol(operand1))operand1 = findSymbolAddress(operand1);
-						if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
-						try {
-							objectCode = makeObjectCode(interMediateAssemblyLine);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					//WRITE TO TEXTRECORD
-					//if(lengthOfTextRec == 0)initializeTextRecord();
-					if((fitIntoTextRec(objectCode)) 
-							&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
-							&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESB")))
-						writeObjectCode(objectCode);
-					//IF OBJECTCODE DOESNT FIT INTO CURRENT TEXTRECORD OR OPERATOR IS RESW OR RESB
-					else {
-						fixLengthInTextRecord();
-						printToRecord(objectCodeString + "\n");
+					operand1 = interMediateAssemblyLine.getOperand1();
+					operand2 = interMediateAssemblyLine.getOperand2();
+					if(interMediateAssemblyLine.getOpmnemonic().equals("START")){
+						printHeaderRecord(interMediateAssemblyLine);
 						initializeTextRecord();
-						writeObjectCode(objectCode);
+					}
+					//IF COMMENT
+					else if(interMediateAssemblyLine.isFullComment()){}
+					//IF NOT COMMENT
+					else{
+						searchAndProcessBase(interMediateAssemblyLine);
+						//IF BYTE OR WORD
+						if(interMediateAssemblyLine.getOpmnemonic().equals("BYTE")
+								|| (interMediateAssemblyLine.getOpmnemonic().equals("WORD"))){
+							objectCode = constantToHex(interMediateAssemblyLine.getOperand1());
+						}
+						//IF NOT BYTE OR WORD
+						else{
+							if(isSymbol(operand1))operand1 = findSymbolAddress(operand1);
+							if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
+							try {
+								objectCode = makeObjectCode(interMediateAssemblyLine);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						//WRITE TO TEXTRECORD
+						//if(lengthOfTextRec == 0)initializeTextRecord();
+						if((fitIntoTextRec(objectCode)) 
+								&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
+								&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESB")))
+							writeObjectCode(objectCode);
+						//IF OBJECTCODE DOESNT FIT INTO CURRENT TEXTRECORD OR OPERATOR IS RESW OR RESB
+						else {
+							if((!operand1.equals("1"))){
+								//	&& ((interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
+								//			|| (interMediateAssemblyLine.getOpmnemonic().equals("RESB")))){ 
+								fixLengthInTextRecord();
+								printToRecord(objectCodeString);
+								initializeTextRecord();
+							}
+							writeObjectCode(objectCode);
+						}
 					}
 				}
 			}
 			//IF OPCODE = END
-			else printEndRecord();
+			else {
+				fixLengthInTextRecord();
+				printToRecord(objectCodeString);
+				printEndRecord();
+			}
 			interMediateAssemblyLine.setAssembledOpcode(objectCode);
 			printToOverviewFile(currentInterMediateLine);
 		}
@@ -344,7 +356,7 @@ public class TwoPass
 			//		IMMEDIATE ADDRESING---------------------START---------------------------------
 
 			if(!assemblyLine.isIndirect() && assemblyLine.isImmediate()){
-				
+
 				if(!assemblyLine.isIndexed() && isPCPossible() && !assemblyLine.isExtended()){
 
 
@@ -365,7 +377,7 @@ public class TwoPass
 					else disp = targetAddress;
 					while (disp.length() < 3) disp = "0" + disp;
 				}
-				
+
 				else if(!assemblyLine.isIndexed() && !isBasePossible() && !isPCPossible() && !assemblyLine.isExtended()){
 					disp = targetAddress;
 					while(disp.length() < 3) disp = "0" + disp;
@@ -397,7 +409,54 @@ public class TwoPass
 		if (objectCode.equals("000000"))return "";
 		else return objectCode;
 	}
-	
+
+	public void writeReferRec(){
+		printToRecord("\nR");
+		int length = 0;
+		String operand = interMediateAssemblyLine.getOperand1();
+		String symbol = "";
+		while(true){
+			int index = operand.indexOf(',');
+			if(index != -1)symbol = operand.substring(0, index);
+			else symbol = operand.substring(0);
+			while(symbol.length()<6) symbol += " ";
+			printToRecord(symbol);
+			length++;
+			if(length==12) {
+				printToRecord("\nR");
+				length = 0;
+			}			
+			operand = operand.substring(index+1);
+			if(index==-1) break;
+		}
+	}
+
+	public void writeDefineRec(){
+
+		printToRecord("\nD");
+		int length = 0;
+		String operand = interMediateAssemblyLine.getOperand1();
+		String symbol = "";
+		while(true){
+			int index = operand.indexOf(',');
+			if(index != -1)symbol = operand.substring(0, index);
+			else symbol = operand.substring(0);
+			String address = symTab.get(symbol).getAddress();
+			while(address.length()<6) address = "0" + address;
+			while(symbol.length()<6) symbol += " ";
+			printToRecord(symbol + address);
+			length++;
+
+			if(length==6){ 
+				printToRecord("\nD");
+				length = 0;
+			}
+
+			operand = operand.substring(index+1);
+			if(index==-1) break;
+		}
+	}
+
 	public String hexMath(String hex1, char operator, String hex2){
 		if (operator=='+'){
 			int i1= Integer.parseInt(hex1,16);
@@ -432,16 +491,22 @@ public class TwoPass
 	//Corrects the length in the text record.
 	public void fixLengthInTextRecord(){
 		char[] objectCodeArray = objectCodeString.toCharArray();
-		String hex = intToHex(lengthOfTextRec-9);
+		
+		String hex = intToHex((lengthOfTextRec - 9)/2);
 		char[] tempCharArray = hex.toCharArray();
+		objectCodeString = "";
 		if(hex.length()==1){
 			objectCodeArray[7]='0';
 			objectCodeArray[8]=tempCharArray[0];
 		}
 		else{
-			objectCodeArray[8]=(hex.toCharArray())[0];
-			objectCodeArray[9]=(hex.toCharArray())[1];	
+			objectCodeArray[7]=(hex.toCharArray())[0];
+			objectCodeArray[8]=(hex.toCharArray())[1];	
 		}
+		objectCodeString = new String(objectCodeArray);
+//		for(int i = 0; i<objectCodeArray.length; i++){
+//			objectCodeString += objectCodeArray[i]; 
+//		}
 	}
 
 	//Writes the given objectCode to record and increases the lengthOfTextRec.
@@ -462,7 +527,7 @@ public class TwoPass
 	public void initializeTextRecord(){
 		lengthOfTextRec = 0;
 		locctr = correctFormat(locctr);
-		objectCodeString = "T" +  locctr + "00";
+		objectCodeString = "\nT" +  locctr + "00";
 		lengthOfTextRec += 9;
 	}
 	//Corrects the format of LOCCTR to 6 alphanumerical.
@@ -538,7 +603,7 @@ public class TwoPass
 			System.out.println("Program name too long, has been cut to: "
 					+ programName);
 		}
-		printToRecord("H" + programName + startAddress + programLength + "\n");
+		printToRecord("H" + programName + startAddress + programLength);
 	}
 
 	//Prints a line to the Overview text file.
