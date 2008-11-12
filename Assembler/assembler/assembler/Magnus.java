@@ -41,8 +41,8 @@ public class Magnus {
 	public String stripToValue(String string){
 		return string.substring(string.indexOf("'")+1).substring(0, string.indexOf("'"));	
 	}
-	
-	public void literals(AL assemblyLine){
+
+	public void searchLiterals(AL assemblyLine){
 		//		Searching for literans and adding to LITTAB if found
 		if(assemblyLine.getOperand1().toCharArray()[0] == '='){
 			if(litTab.containsKey(assemblyLine.getOperand1())){
@@ -57,15 +57,15 @@ public class Magnus {
 		else if(assemblyLine.getOpmnemonic().equals("LTORG")){
 
 			litIter = litTab.keySet().iterator();
-			
+
 			while(litIter.hasNext()){
 				String litIterString = litIter.next();
 				Literal tempLit = litTab.get(litIterString);
-		
+
 				tempLit.setAddress(locctr);
-				
+
 				litTab.put(litIterString , tempLit);
-				
+
 				hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));			
 			}
 		} 
@@ -101,12 +101,8 @@ public class Magnus {
 
 	}
 
-	//	PASS ONE
-	public void passOne(){
-
+	public void firstPassBackup(){
 		assemblyLine = alstr.nextAL();
-
-
 		if (assemblyLine.getOpmnemonic() == "START"){
 
 			startAddress = assemblyLine.getOperand1();
@@ -120,8 +116,6 @@ public class Magnus {
 			assemblyLine = alstr.nextAL();
 		}
 		else locctr = "000000";
-
-
 
 		while(!alstr.atEnd()){
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
@@ -138,17 +132,113 @@ public class Magnus {
 						symTab.put(assemblyLine.getLabel(), sym);
 					}
 				}
-				if(assemblyLine.getOpmnemonic() != ""){
+				if(assemblyLine.getOpmnemonic() != "" || assemblyLine.getOpmnemonic() != "LTORG"){
 					correctLOCCTR(assemblyLine);
-				}
-				//				else throw new InvalidOpcode;
+				}			
+				searchLiterals(assemblyLine);
 			}
 
 			assemblyLine = alstr.nextAL();
 		}
-		String programLength = hexMath(locctr, '-' ,startAddress);
+
+
+		litIter = litTab.keySet().iterator();
+
+		while(litIter.hasNext()){
+			String litIterString = litIter.next();
+			Literal tempLit = litTab.get(litIterString);
+
+			if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
+
+			litTab.put(litIterString , tempLit);
+
+			locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
+		}
+		InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+		intermediateLines.add(currentInterMediateLine);
+
+		programLength = hexMath(locctr, '-' ,startAddress);
 		while(programLength.length() < 6) programLength = "0" + programLength;
 	}
+
+	//	PASS ONE
+	public void firstPass(){
+		assemblyLine = alstr.nextAL();
+		if (assemblyLine.getOpmnemonic() == "START"){
+
+			startAddress = assemblyLine.getOperand1();
+			while(startAddress.length() < 6) startAddress = "0" + startAddress;
+
+			locctr = intToHex((Integer.parseInt(startAddress)));
+
+			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+			intermediateLines.add(currentInterMediateLine);
+
+			assemblyLine = alstr.nextAL();
+		}
+		else locctr = "000000";
+
+		while(!alstr.atEnd()){
+			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+			intermediateLines.add(currentInterMediateLine);
+
+			if(!assemblyLine.isFullComment()){
+				if(assemblyLine.getLabel() != ""){
+					if(symTab.containsKey(assemblyLine.getLabel())){
+						//						TODO: finne ut korsjen vi kasta skikkeelige exeptions
+						//						throw new IllegalDuplicateError;
+					}
+					else {
+						Symbol sym = new Symbol(locctr, "", 0, 0);
+						symTab.put(assemblyLine.getLabel(), sym);
+					}
+				}
+				if(assemblyLine.getOpmnemonic() != "" || assemblyLine.getOpmnemonic() != "LTORG"){
+					correctLOCCTR(assemblyLine);
+				}			
+				searchLiterals(assemblyLine);
+				if(assemblyLine.getOpmnemonic() == "END"){
+					litIter = litTab.keySet().iterator();
+
+					while(litIter.hasNext()){
+						String litIterString = litIter.next();
+						Literal tempLit = litTab.get(litIterString);
+
+						if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
+
+						litTab.put(litIterString , tempLit);
+
+						locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
+					}
+				}
+			}
+
+			assemblyLine = alstr.nextAL();
+		}
+
+		if (alstr.atEnd() || assemblyLine.getOpmnemonic() == "END"){
+			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+			intermediateLines.add(currentInterMediateLine);
+
+			litIter = litTab.keySet().iterator();
+
+			while(litIter.hasNext()){
+				String litIterString = litIter.next();
+				Literal tempLit = litTab.get(litIterString);
+
+				if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
+
+				litTab.put(litIterString , tempLit);
+
+				locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
+			}
+
+		}
+
+		programLength = hexMath(locctr, '-' ,startAddress);
+		while(programLength.length() < 6) programLength = "0" + programLength;
+	}
+
 
 	public String hexMath(String hex1, char operator, String hex2){
 		if (operator=='+'){
