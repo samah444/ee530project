@@ -112,7 +112,7 @@ public class TwoPass
 
 			litTab.put(litIterString , tempLit);
 
-			hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));	
+			hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
 		}
 
 		InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
@@ -226,7 +226,7 @@ public class TwoPass
 
 				litTab.put(litIterString , tempLit);
 
-				hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));			
+				hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));			
 			}
 		} 
 
@@ -498,18 +498,14 @@ public class TwoPass
 	//Replaces operands according to SYMTAB,'*' and LITTAB.
 	public void replaceOperands(){
 		//OPERAND1
-		if(operand1.contains("=")){
+		if(interMediateAssemblyLine.isLiteral()){
 			operand1 = findLiteralAddress(operand1);
 			ltorg = false;
 		}
 		else if (operand1.equals("*"))operand1 = locctr;
 		else if (isSymbol(operand1))operand1 = findSymbolAddress(operand1);
 		//OPERAND2
-		if(operand2.contains("=")){
-			operand2 = findLiteralAddress(operand2);
-			ltorg = false;
-		}
-		else if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
+		if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
 		else if(operand2.equals("*"))operand2 = locctr;
 	}
 
@@ -831,10 +827,10 @@ public class TwoPass
 	public int findNumberOfBytesInConstant(String constant){
 		int LengthOfByte;
 		char[] byteContent = constant.toCharArray();
-		if(byteContent[0] == '='){
-			constant = constant.substring(1);
-			byteContent = constant.toCharArray();
-		}
+//		if(byteContent[0] == '='){
+//			constant = constant.substring(1);
+//			byteContent = constant.toCharArray();
+//		}TODO:FJERNE?
 		if(byteContent[0]== 'X'){
 			LengthOfByte = ((constant.length()-3)/2);
 		}
