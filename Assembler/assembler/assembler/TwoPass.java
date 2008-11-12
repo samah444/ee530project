@@ -36,7 +36,7 @@ public class TwoPass
 	private String operand2;
 	private String objectCode = "";
 	private boolean ltorg = false;
-	private String ltorgLOCCTR = "";
+	private String ltorgLOCCTR = "0";
 
 
 	public TwoPass(OpTable opt, ALStream alstream)
@@ -228,12 +228,17 @@ public class TwoPass
 			}
 		} 
 	}
+
 	public void insertLiterals(){
-		while(true){
-			litIter = litTab.keySet().iterator();
-			while(litIter.hasNext()){
-				String litIterString = litIter.next();
-				Literal tempLit = litTab.get(litIterString);
+		litIter = litTab.keySet().iterator();
+		while(litIter.hasNext()){
+			String litIterString = litIter.next();
+			Literal tempLit = litTab.get(litIterString);
+			if((Integer.parseInt(tempLit.getAddress(),16))<(Integer.parseInt(locctr,16)) 
+					&& (Integer.parseInt(tempLit.getAddress(),16)>(Integer.parseInt(ltorgLOCCTR,16)))){
+				
+				//Insert hond her
+			
 			}
 		}
 	}
@@ -775,7 +780,7 @@ public class TwoPass
 		}
 
 	}
-	
+
 
 	//Sets the LOCCTR to its correct position.
 	public void correctLOCCTR(AL assemblyLine){
