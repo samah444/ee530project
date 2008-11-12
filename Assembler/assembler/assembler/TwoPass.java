@@ -764,20 +764,9 @@ public class TwoPass
 		else return aLiteral.getAddress();
 	}
 
-	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
-	//	public String constantToHex(String constant){
-	//		int decContent = 0;
-	//		char[] byteContent = constant.toCharArray();
-	//		String hex = "";
-	//		for(int i = 2; i<constant.length()-1; i++){
-	//			decContent = (int)(byteContent[i]);
-	//			hex += intToHex(decContent);
-	//		}
-	//		return hex;
-	//	}
-
 	/**
-	 * Constant to hex.
+	 * Takes the string between the to single quotes
+	 * and convert it to a hex value if its a char.
 	 * 
 	 * @param constant The constant
 	 * @return The constant in hex.
@@ -790,7 +779,6 @@ public class TwoPass
 		for(int i = 2; i<constant.length()-1; i++){
 			content += byteContent[i];
 			decContent = (int)(byteContent[i]);
-			//if(byteContent[0]=='C') hex += intToHex(decContent);
 			hex += intToHex(decContent);
 		}
 		if(byteContent[0]=='C') return hex;
@@ -798,7 +786,7 @@ public class TwoPass
 	}
 
 	/**
-	 * Strip to value.
+	 * Takes out the string between the to single quotes.
 	 * 
 	 * @param string The string to strip.
 	 * @return The value from the string.
@@ -950,7 +938,8 @@ public class TwoPass
 	}
 
 	/**
-	 * Finds number of bytes in given constant and returns it.
+	 * Find the length of the string between the to single quotes
+	 * and return the number of bytes it contains.
 	 * 
 	 * @param constant the constant 
 	 * @return int The number of bytes in the constant.
@@ -958,10 +947,6 @@ public class TwoPass
 	public int findNumberOfBytesInConstant(String constant){
 		int LengthOfByte;
 		char[] byteContent = constant.toCharArray();
-		//		if(byteContent[0] == '='){
-		//			constant = constant.substring(1);
-		//			byteContent = constant.toCharArray();
-		//		}TODO:FJERNE?
 		if(byteContent[0]== 'X'){
 			LengthOfByte = ((constant.length()-3)/2);
 		}
