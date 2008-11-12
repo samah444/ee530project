@@ -203,34 +203,33 @@ public class TwoPass
 
 	public void searchLiterals(AL assemblyLine){
 		//		Searching for literans and adding to LITTAB if found
-		if(assemblyLine.getOperand1().equals("")){}
-		else{
-			if(assemblyLine.getOperand1().toCharArray()[0] == '='){
-				if(litTab.containsKey(assemblyLine.getOperand1())){
-					//						TODO: finne ut korsjen vi kasta skikkeelige exeptions
-					//						throw new IllegalDuplicateError;
-				}
-				else{
-					Literal lit = new Literal("", stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
-					litTab.put(assemblyLine.getOperand1(), lit);
-				}
+
+		if(assemblyLine.isLiteral()){
+			if(litTab.containsKey(assemblyLine.getOperand1())){
+				//						TODO: finne ut korsjen vi kasta skikkeelige exeptions
+				//						throw new IllegalDuplicateError;
 			}
-			else if(assemblyLine.getOpmnemonic().equals("LTORG")){
-
-				litIter = litTab.keySet().iterator();
-
-				while(litIter.hasNext()){
-					String litIterString = litIter.next();
-					Literal tempLit = litTab.get(litIterString);
-
-					if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
-
-					litTab.put(litIterString , tempLit);
-
-					hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));			
-				}
-			} 
+			else{
+				Literal lit = new Literal("", stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
+				litTab.put(assemblyLine.getOperand1(), lit);
+			}
 		}
+		else if(assemblyLine.getOpmnemonic().equals("LTORG")){
+
+			litIter = litTab.keySet().iterator();
+
+			while(litIter.hasNext()){
+				String litIterString = litIter.next();
+				Literal tempLit = litTab.get(litIterString);
+
+				if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
+
+				litTab.put(litIterString , tempLit);
+
+				hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));			
+			}
+		} 
+
 	}
 
 	public void insertLiterals(){
