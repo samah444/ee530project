@@ -98,6 +98,8 @@ public class TwoPass
 
 			assemblyLine = alstr.nextAL();
 		}
+		InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+		intermediateLines.add(currentInterMediateLine);
 		programLength = hexMath(locctr, '-' ,startAddress);
 		while(programLength.length() < 6) programLength = "0" + programLength;
 	}
