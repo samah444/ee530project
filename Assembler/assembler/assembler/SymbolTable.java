@@ -13,6 +13,7 @@ import java.util.HashMap;
 */
 public class SymbolTable {
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
+	//TODO: slett
 //	
 //	/**
 //	 * Puts a Symbol into the symTab.
