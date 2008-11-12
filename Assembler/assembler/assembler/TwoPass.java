@@ -106,7 +106,7 @@ public class TwoPass
 			String litIterString = litIter.next();
 			Literal tempLit = litTab.get(litIterString);
 	
-			tempLit.setAddress(locctr);
+			if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
 			
 			litTab.put(litIterString , tempLit);
 			
@@ -200,7 +200,7 @@ public class TwoPass
 				//						throw new IllegalDuplicateError;
 			}
 			else{
-				Literal lit = new Literal(locctr, stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
+				Literal lit = new Literal("", stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
 				litTab.put(assemblyLine.getOperand1(), lit);
 			}
 		}
@@ -211,8 +211,8 @@ public class TwoPass
 			while(litIter.hasNext()){
 				String litIterString = litIter.next();
 				Literal tempLit = litTab.get(litIterString);
-		
-				tempLit.setAddress(locctr);
+				
+				if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
 				
 				litTab.put(litIterString , tempLit);
 				
