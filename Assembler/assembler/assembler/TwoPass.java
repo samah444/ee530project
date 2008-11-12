@@ -64,26 +64,25 @@ public class TwoPass
 	}
 	//	PASS ONE
 	public void firstPass(){
-		assemblyLine = alstr.nextAL();
-		if (assemblyLine.getOpmnemonic() == "START"){
-
-			startAddress = assemblyLine.getOperand1();
-			while(startAddress.length() < 6) startAddress = "0" + startAddress;
-
-			locctr = intToHex((Integer.parseInt(startAddress)));
-
-			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
-			intermediateLines.add(currentInterMediateLine);
+		
+		while(!alstr.atEnd()){
 
 			assemblyLine = alstr.nextAL();
-		}
-		else locctr = "000000";
+			
+			if (assemblyLine.getOpmnemonic() == "START"){
 
-		while(!alstr.atEnd()){
-			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
-			intermediateLines.add(currentInterMediateLine);
+				startAddress = assemblyLine.getOperand1();
+				while(startAddress.length() < 6) startAddress = "0" + startAddress;
 
-			if(!assemblyLine.isFullComment()){
+				locctr = intToHex((Integer.parseInt(startAddress)));
+
+				InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+				intermediateLines.add(currentInterMediateLine);
+
+				assemblyLine = alstr.nextAL();
+			}		
+
+			else if(!assemblyLine.isFullComment()){
 				if(assemblyLine.getLabel() != ""){
 					if(symTab.containsKey(assemblyLine.getLabel())){
 						//						TODO: finne ut korsjen vi kasta skikkeelige exeptions
@@ -94,30 +93,16 @@ public class TwoPass
 						symTab.put(assemblyLine.getLabel(), sym);
 					}
 				}
-				if(assemblyLine.getOpmnemonic() != "" || assemblyLine.getOpmnemonic() != "LTORG"){
-					correctLOCCTR(assemblyLine);
-				}			
+		
 				searchLiterals(assemblyLine);
 			}
+			
+			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+			intermediateLines.add(currentInterMediateLine);
+					
+			correctLOCCTR(assemblyLine);
 
-			assemblyLine = alstr.nextAL();
 		}
-
-
-		litIter = litTab.keySet().iterator();
-
-		while(litIter.hasNext()){
-			String litIterString = litIter.next();
-			Literal tempLit = litTab.get(litIterString);
-
-			if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
-
-			litTab.put(litIterString , tempLit);
-
-			locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
-		}
-		InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
-		intermediateLines.add(currentInterMediateLine);
 
 		programLength = hexMath(locctr, '-' ,startAddress);
 		while(programLength.length() < 6) programLength = "0" + programLength;
@@ -228,7 +213,7 @@ public class TwoPass
 				litTab.put(assemblyLine.getOperand1(), lit);
 			}
 		}
-		else if(assemblyLine.getOpmnemonic().equals("LTORG")){
+		else if(assemblyLine.getOpmnemonic().equals("LTORG") || assemblyLine.getOpmnemonic().equals("END")){
 
 			litIter = litTab.keySet().iterator();
 
@@ -236,14 +221,14 @@ public class TwoPass
 				String litIterString = litIter.next();
 				Literal tempLit = litTab.get(litIterString);
 
-				if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
+				if(tempLit.getAddress().equals("")) {
+					tempLit.setAddress(locctr);
+					locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));
+				}
 
 				litTab.put(litIterString , tempLit);
-
-				locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));			
 			}
 		} 
-
 	}
 
 	public void insertLiterals(){
@@ -615,12 +600,12 @@ public class TwoPass
 		char[] tempCharArray = hex.toCharArray();
 		objectCodeString = "";
 		if(hex.length()==1){
-			objectCodeArray[7]='0';
-			objectCodeArray[8]=tempCharArray[0];
+			objectCodeArray[8]='0';
+			objectCodeArray[9]=tempCharArray[0];
 		}
 		else{
-			objectCodeArray[7]=(hex.toCharArray())[0];
-			objectCodeArray[8]=(hex.toCharArray())[1];	
+			objectCodeArray[8]=(hex.toCharArray())[0];
+			objectCodeArray[9]=(hex.toCharArray())[1];	
 		}
 		objectCodeString = new String(objectCodeArray);
 		//		for(int i = 0; i<objectCodeArray.length; i++){
@@ -751,7 +736,9 @@ public class TwoPass
 			//IF NOT COMMENT
 			else{
 				//LOCCTR
-				outOverview.write((correctFormat(iAssemblyLine.getLocctr())) + "\t");
+				if(!assemblyLine.getOpmnemonic().equals("END"))
+						outOverview.write((correctFormat(iAssemblyLine.getLocctr())) + "\t");
+				else outOverview.write("\t\t");
 				//LABEL
 				outOverview.write(assemblyLine.getLabel() + "\t");
 				if(assemblyLine.getLabel().length() < 6)
