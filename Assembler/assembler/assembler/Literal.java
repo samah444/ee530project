@@ -3,10 +3,10 @@ package assembler;
 public class Literal {
 	
 	private int length;
-	private int value;
+	private String value;
 	private String address;
 	
-	public Literal(String address, int value, int length){
+	public Literal(String address, String value, int length){
 		this.address = address;
 		this.value = value;
 		this.length = length;
@@ -20,11 +20,11 @@ public class Literal {
 		this.length = length;
 	}
 
-	public int getValue() {
+	public String getValue() {
 		return value;
 	}
 
-	public void setValue(int value) {
+	public void setValue(String value) {
 		this.value = value;
 	}
 
