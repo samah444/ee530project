@@ -103,7 +103,7 @@ public class TwoPass
 			assemblyLine = alstr.nextAL();
 		}
 
-		
+
 		litIter = litTab.keySet().iterator();
 
 		while(litIter.hasNext()){
@@ -118,7 +118,7 @@ public class TwoPass
 		}
 		InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 		intermediateLines.add(currentInterMediateLine);
-		
+
 		programLength = hexMath(locctr, '-' ,startAddress);
 		while(programLength.length() < 6) programLength = "0" + programLength;
 	}
@@ -188,6 +188,7 @@ public class TwoPass
 				}
 				//IF OPCODE = END
 				else {
+					objectCode = "";
 					if(ltorg == false){
 						printToOverviewFile(currentInterMediateLine);
 						ltorgRun = true;
@@ -201,7 +202,6 @@ public class TwoPass
 				interMediateAssemblyLine.setAssembledOpcode(objectCode);
 				if(!ltorgRun)printToOverviewFile(currentInterMediateLine);
 				ltorgRun = false;
-				
 			}
 			//IF OPMNEMONIC = LTORG
 			else{
@@ -265,13 +265,13 @@ public class TwoPass
 				}
 				try {
 					if(interMediateAssemblyLine.getOpmnemonic().equals("LTORG")){
-						outOverview.write(lineNumber + "\t\t\t\t\t\t" + "LTORG\n");
+						outOverview.write(lineNumber + "\t\t\t\t\t" + "LTORG\n");
 						lineNumber++;
 					}
 
 					outOverview.write("\t"+correctFormat(tempLit.getAddress())+"\t");
-					outOverview.write("*\t\t\t="+litName+"\t\t\t"+objectCode + "\n");
-					
+					outOverview.write("*\t\t="+litName+"\t\t\t"+objectCode + "\n");
+
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -753,54 +753,55 @@ public class TwoPass
 				//LOCCTR
 				outOverview.write((correctFormat(iAssemblyLine.getLocctr())) + "\t");
 				//LABEL
-				outOverview.write(assemblyLine.getLabel() + "\t\t");
+				outOverview.write(assemblyLine.getLabel() + "\t");
 				if(assemblyLine.getLabel().length() < 6)
 					outOverview.write("\t");
 				//IF EXTENDED
 				if(assemblyLine.isExtended())outOverview.write("+");
-				//IF LITERAL
-				if(assemblyLine.isLiteral()){
-					outOverview.write("=");
-					outOverview.write(assemblyLine.getOperand1());
-					outOverview.write("\t\t");
+
+				//OPMNEMONIC
+				outOverview.write(assemblyLine.getOpmnemonic() + "\t");
+				if(assemblyLine.getOpmnemonic().length() < 6)
+					outOverview.write("\t");
+				//IF ADDRESSING
+				if(assemblyLine.isIndirect())outOverview.write("@");
+				else if(assemblyLine.isImmediate())outOverview.write("#");
+				//IF DIRECTIVE
+				if(assemblyLine.isDirective()){
+					//DIRECTIVE OPERANDS
+					if (operand2.equals(""))
+						outOverview.write(assemblyLine.getOperand1());
+					else outOverview.write(assemblyLine.getOperand2());
 				}
-				//IF NOT LITERAL
+				//IF NOT DIRECTIVE
 				else {
-					//OPMNEMONIC
-					outOverview.write(assemblyLine.getOpmnemonic() + "\t\t");
-					//IF ADDRESSING
-					if(assemblyLine.isIndirect())outOverview.write("@");
-					else if(assemblyLine.isImmediate())outOverview.write("#");
-					//IF DIRECTIVE
-					if(assemblyLine.isDirective()){
-						//DIRECTIVE OPERANDS
-						if (operand2.equals(""))
-							outOverview.write(assemblyLine.getOperand1());
-						else outOverview.write(assemblyLine.getOperand2());
-					}
-					//IF NOT DIRECTIVE
-					else {
-						//OPERANDS
-						switch(assemblyLine.getOperandType()){
-						case 0:
-							break;
-						case 1:
-							outOverview.write(assemblyLine.getOperand1());
-							break;
-						case 2:
-							outOverview.write(assemblyLine.getOperand1() + "," +
-									assemblyLine.getOperand2());
-							break;
-						}
-					}
-					//INDEX
-					if(assemblyLine.isIndexed())outOverview.write(",X" + "\t");
-					else {
-						if(assemblyLine.getOperand1().length() < 6)
-							outOverview.write("\t");
-						outOverview.write("\t");
+					//OPERANDS
+					switch(assemblyLine.getOperandType()){
+					case 0:
+						break;
+					case 1:
+						//IF LITERAL
+						if(assemblyLine.isLiteral())outOverview.write("=");
+						outOverview.write(assemblyLine.getOperand1());
+						break;
+					case 2:
+						outOverview.write(assemblyLine.getOperand1() + "," +
+								assemblyLine.getOperand2());
+						break;
 					}
 				}
+				//INDEX
+				if(assemblyLine.isIndexed())outOverview.write(",X" + "\t");
+				else {
+					if(assemblyLine.isLiteral()){
+						if(assemblyLine.getOperand1().length() < 5)
+							outOverview.write("\t");
+					}
+					else if(assemblyLine.getOperand1().length() < 6)
+						outOverview.write("\t");
+					outOverview.write("\t");
+				}
+
 				//OBJECTCODE
 				outOverview.write(objectCode);
 			}
