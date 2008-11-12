@@ -1,4 +1,3 @@
-package assembler;
 /*
 * @author Simen Hammerseth
 * @author Magnus Lervaag
@@ -10,6 +9,7 @@ package assembler;
 * Symbol contains all the info about a symbol as defined by the programmer in
 * the source code. It also provides getters and setter for the info.
 */
+package assembler;
 
 //TODO:what the hell is type and length for. har vi bruk for dei
 //TODO:slette noen av setterane når vi ser vi ikke får bruk for dei
