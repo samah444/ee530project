@@ -1,3 +1,9 @@
+/*
+ * @author Simen Hammerseth
+ * @author Magnus Lervaag
+ * @author Andreas Urke
+ * @version 11.12.2008
+ */
 package assembler;
 
 import java.io.BufferedWriter;
@@ -9,7 +15,11 @@ import java.util.Iterator;
 import java.util.ListIterator;
 
 
+// TODO: Auto-generated Javadoc
 //You'll be filling this one out
+/**
+ * The Class TwoPass.
+ */
 public class TwoPass
 {
 	private ALStream alstr;
@@ -39,10 +49,18 @@ public class TwoPass
 	private boolean ltorgRun = false;
 	private String ltorgLOCCTR = "0";
 
-
+	/**
+	 * Instantiates a new two pass.
+	 * 
+	 * @param opt the opt
+	 * @param alstream the alstream
+	 */
 	public TwoPass(OpTable opt, ALStream alstream)
 	{ alstr = alstream; optab = opt; }
 
+	/**
+	 * Assemble.
+	 */
 	public void assemble()
 	{
 		// 2 pass algorithm to assemble the "code" in
@@ -62,7 +80,9 @@ public class TwoPass
 			e.printStackTrace();
 		}
 	}
-	//	PASS ONE
+	/**
+	 * First pass.
+	 */
 	public void firstPass(){
 		
 		while(!alstr.atEnd()){
@@ -108,7 +128,9 @@ public class TwoPass
 		while(programLength.length() < 6) programLength = "0" + programLength;
 	}
 
-	//The Second pass
+	/**
+	 * Second pass.
+	 */
 	public void secondPass(){
 		alstr.reset();
 		iter = intermediateLines.listIterator();
@@ -200,6 +222,11 @@ public class TwoPass
 		}
 	}
 
+	/**
+	 * Search literals.
+	 * 
+	 * @param assemblyLine the assembly line
+	 */
 	public void searchLiterals(AL assemblyLine){
 		//		Searching for literans and adding to LITTAB if found
 
@@ -231,6 +258,9 @@ public class TwoPass
 		} 
 	}
 
+	/**
+	 * Insert literals.
+	 */
 	public void insertLiterals(){
 		litIter = litTab.keySet().iterator();
 		while(litIter.hasNext()){
@@ -264,7 +294,13 @@ public class TwoPass
 			}
 		}
 	}
-	//	Makes object code
+	
+	/**
+	 * Makes object code.
+	 * @param assemblyLine the assembly line
+	 * @return the string
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public String makeObjectCode(AL assemblyLine) throws IOException{
 
 
@@ -500,7 +536,9 @@ public class TwoPass
 		else return objectCode;
 	}
 
-	//Replaces operands according to SYMTAB,'*' and LITTAB.
+	/**
+	 * Replaces operands according to SYMTAB,'*' and LITTAB.
+	 */
 	public void replaceOperands(){
 		//OPERAND1
 		if(interMediateAssemblyLine.isLiteral()){
@@ -514,6 +552,9 @@ public class TwoPass
 		else if(operand2.equals("*"))operand2 = locctr;
 	}
 
+	/**
+	 * Write refer rec.
+	 */
 	public void writeReferRec(){
 		printToRecord("\nR");
 		int length = 0;
@@ -535,6 +576,9 @@ public class TwoPass
 		}
 	}
 
+	/**
+	 * Write define rec.
+	 */
 	public void writeDefineRec(){
 
 		printToRecord("\nD");
@@ -561,6 +605,14 @@ public class TwoPass
 		}
 	}
 
+	/**
+	 * Hex math.
+	 * 
+	 * @param hex1 the hex1
+	 * @param operator the operator
+	 * @param hex2 the hex2
+	 * @return the string
+	 */
 	public String hexMath(String hex1, char operator, String hex2){
 		if (operator=='+'){
 			int i1= Integer.parseInt(hex1,16);
@@ -576,7 +628,11 @@ public class TwoPass
 		return hex1;	
 	}
 
-	//Searches for BASE and NOBASE and processes it.
+	/**
+	 * Searches for BASE and NOBASE and processes it.
+	 * 
+	 * @param assemblyLine the assembly line
+	 */
 	public void searchAndProcessBase(AL assemblyLine){
 		//IF BASE
 		if(assemblyLine.getOpmnemonic().equals("BASE")){
@@ -591,8 +647,10 @@ public class TwoPass
 			base = "";
 		}
 	}
-
-	//Corrects the length in the text record.
+	
+	/**
+	 * Corrects the length in the current text record.
+	 */
 	public void fixLengthInTextRecord(){
 		char[] objectCodeArray = objectCodeString.toCharArray();
 
@@ -613,13 +671,21 @@ public class TwoPass
 		//		}
 	}
 
-	//Writes the given objectCode to record and increases the lengthOfTextRec.
+	/**
+	 * Writes the given objectCode to record and increases the lengthOfTextRec.
+	 * 
+	 * @param objectCode the object code
+	 */
 	public void writeObjectCode(String objectCode){
 		objectCodeString += objectCode;
 		lengthOfTextRec += objectCode.length();
 	}
 
-	//Will objecCode fit into current TextRecord? True if Yes, False otherwise.
+	/**
+	 * Will objecCode fit into current TextRecord? True if Yes, False otherwise.
+	 * @param objectCode the object code
+	 * @return true, if successful
+	 */
 	public boolean fitIntoTextRec(String objectCode){
 		if((objectCode.length()+lengthOfTextRec)<70)
 			return true;
@@ -627,25 +693,41 @@ public class TwoPass
 			return false;
 	}
 
-	//Initializes a Text Record and writes it to record.
+	/**
+	 * Initializes a Text Record and writes it to record.
+	 */
 	public void initializeTextRecord(){
 		lengthOfTextRec = 0;
 		locctr = correctFormat(locctr);
 		objectCodeString = "\nT" +  locctr + "00";
 		lengthOfTextRec += 9;
 	}
-	//Corrects the format of LOCCTR to 6 alphanumerical.
+	
+	/**
+	 * /Corrects the format of the string to 6 alphanumerical.
+	 * 
+	 * @param string The string to correct
+	 * 
+	 * @return The corrected string
+	 */
 	public String correctFormat(String string){
 		while(string.length() < 6)string = "0" + string;
 		return string;
 	}
 
-	//Creates the end record and prints it to file.
+	/**
+	 * Creates the end record and prints it to file.
+	 */
 	public void printEndRecord(){
 		printToRecord("\nE" + startAddress);
 	}
 
-	//Returns true if operand is a Symbol, false otherwise.
+	/**
+	 * Returns true if operand is a Symbol, false otherwise.
+	 *
+	 * @param operand the operand
+	 * @return true, if is symbol
+	 */
 	public boolean isSymbol(String operand){
 		//Pattern star = Pattern.compile("\h2A");
 		if(!operand.equals("")){
@@ -658,12 +740,24 @@ public class TwoPass
 		return false;
 	}
 
+	/**
+	 * Find symbol address.
+	 * 
+	 * @param operand the operand
+	 * @return the string
+	 */
 	public String findSymbolAddress(String operand){
 		Symbol aSymbol = symTab.get(operand);
 		if (aSymbol == null){return "";}//TODO: Throw undefined Symbol exception. Set error flag?
 		else return aSymbol.getAddress();	
 	}
 
+	/**
+	 * Find literal address.
+	 * 
+	 * @param operand The operand
+	 * @return The literal address.
+	 */
 	public String findLiteralAddress(String operand){
 		Literal aLiteral = litTab.get(operand);
 		if(aLiteral == null){return "";}//TODO: Throw undefined Literal exception.?
@@ -682,6 +776,12 @@ public class TwoPass
 	//		return hex;
 	//	}
 
+	/**
+	 * Constant to hex.
+	 * 
+	 * @param constant The constant
+	 * @return The constant in hex.
+	 */
 	public String constantToHex(String constant){
 		int decContent = 0;
 		String content = "";
@@ -697,11 +797,21 @@ public class TwoPass
 		else return content;
 	}
 
+	/**
+	 * Strip to value.
+	 * 
+	 * @param string The string to strip.
+	 * @return The value from the string.
+	 */
 	public String stripToValue(String string){
 		return string.substring(string.indexOf("'")+1).substring(0, string.indexOf("'"));	
 	}
 
-	//Creates the header record and prints it to file.
+	/**
+	 * Creates the header record and prints it to file.
+	 * 
+	 * @param assemblyLine the assembly line
+	 */
 	public void printHeaderRecord(AL assemblyLine){
 		String programName = assemblyLine.getLabel();
 		boolean shortened = false;
@@ -719,7 +829,11 @@ public class TwoPass
 		printToRecord("H" + programName + startAddress + programLength);
 	}
 
-	//Prints a line to the Overview text file.
+	/**
+	 * Prints a line to the Overview text file.
+	 * 
+	 * @param iAssemblyLine The current assembly line
+	 */
 	public void printToOverviewFile(InterMediateLine iAssemblyLine){
 		try {
 			assemblyLine = iAssemblyLine.getAssemblyLine();
@@ -802,7 +916,12 @@ public class TwoPass
 	}
 
 
-	//Sets the LOCCTR to its correct position.
+
+	/**
+	 * 	Sets the LOCCTR to its correct position.
+	 * 
+	 * @param assemblyLine The current assembly line
+	 */
 	public void correctLOCCTR(AL assemblyLine){
 		String opmnemonic = assemblyLine.getOpmnemonic();
 		if(!(opmnemonic.equals("START") || (opmnemonic.equals("END")))){
@@ -830,7 +949,12 @@ public class TwoPass
 		}
 	}
 
-	//Finds number of bytes in given constant and returns it.
+	/**
+	 * Finds number of bytes in given constant and returns it.
+	 * 
+	 * @param constant the constant 
+	 * @return int The number of bytes in the constant.
+	 */
 	public int findNumberOfBytesInConstant(String constant){
 		int LengthOfByte;
 		char[] byteContent = constant.toCharArray();
@@ -844,6 +968,12 @@ public class TwoPass
 		else LengthOfByte = (constant.length()-3);
 		return LengthOfByte;
 	}
+	
+	/**
+	 * Prints the to record.
+	 * 
+	 * @param objectCode The object code to print.
+	 */
 	public void printToRecord(String objectCode){
 		//		Takes an objectcode string and prints it as a new line in the RecordFile
 		try {
@@ -853,6 +983,12 @@ public class TwoPass
 		} catch (IOException e) {
 		}
 	}
+	
+	/**
+	 * Checks if pc is possible.
+	 * 
+	 * @return boolean True if possible, false otherwise
+	 */
 	public Boolean isPCPossible(){
 		//		When program-counter relative mode is used, disp
 		//		is a 12-bits signed integer
@@ -888,6 +1024,12 @@ public class TwoPass
 			return true;
 		else return false;
 	}
+	
+	/**
+	 * Checks if base possible.
+	 * 
+	 * @return boolean True if possible, false otherwise
+	 */
 	public Boolean isBasePossible(){
 		//		When base relative mode is used, disp is a 12-bits
 		//		unsigned integer
@@ -912,16 +1054,20 @@ public class TwoPass
 		return false;
 	}
 
-	//Takes a decimal int from user and converts it to hex and returns string
-	public String intToHex(int inputFromUser){
-
-
-		int i = inputFromUser;
-		String s = Integer.toHexString(i);
+	/**
+	 * Takes a decimal int and converts it to hex and returns string
+	 * 
+	 * @param inputFromUser The input to convert
+	 * @return the string
+	 */
+	public String intToHex(int input){
+		String s = Integer.toHexString(input);
 		return s;
 	}
 
-	//Fills the SymTab with the register addresses.
+	/**
+	 * Fills the SymTab with the register addresses.
+	 */
 	public void fillSymTabWithRegisters(){
 		String[] regName = {"A", "X", "L", "B", "S", "T", "F", "PC", "SW"};
 		String[] value = {"0", "1", "2", "3", "4", "5", "6", "8", "9"}; 
