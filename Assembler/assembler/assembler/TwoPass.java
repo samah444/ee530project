@@ -28,7 +28,8 @@ public class TwoPass
 	private String startAddress = "000000";
 	private String targetAddress = "0";
 	private String programLength = "000000";
-	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
+	private HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
+	private HashMap<String, Literal> litTab = new HashMap<String, Literal>();
 	String operand1;
 	String operand2;
 	String objectCode = "";
@@ -128,7 +129,10 @@ public class TwoPass
 					else if(interMediateAssemblyLine.isFullComment()){}
 					//IF NOT COMMENT
 					else{
+						//SEARCHES FOR "BASE" AND SETS IT, IF FOUND.
 						searchAndProcessBase(interMediateAssemblyLine);
+						//SEARCHES FOR SYMBOLS AND '*' IN OPERANDS AND REPLACE
+						replaceOperands();
 						//IF BYTE OR WORD
 						if(interMediateAssemblyLine.getOpmnemonic().equals("BYTE")
 								|| (interMediateAssemblyLine.getOpmnemonic().equals("WORD"))){
@@ -136,8 +140,6 @@ public class TwoPass
 						}
 						//IF NOT BYTE OR WORD
 						else{
-							if(isSymbol(operand1))operand1 = findSymbolAddress(operand1);
-							if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
 							try {
 								objectCode = makeObjectCode(interMediateAssemblyLine);
 							} catch (IOException e) {
@@ -146,7 +148,6 @@ public class TwoPass
 							}
 						}
 						//WRITE TO TEXTRECORD
-						//if(lengthOfTextRec == 0)initializeTextRecord();
 						if((fitIntoTextRec(objectCode)) 
 								&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESW"))
 								&& (!interMediateAssemblyLine.getOpmnemonic().equals("RESB")))
@@ -171,6 +172,7 @@ public class TwoPass
 				printToRecord(objectCodeString);
 				printEndRecord();
 			}
+			//ALWAYS DO
 			interMediateAssemblyLine.setAssembledOpcode(objectCode);
 			printToOverviewFile(currentInterMediateLine);
 		}
@@ -411,7 +413,15 @@ public class TwoPass
 		if (objectCode.equals("000000"))return "";
 		else return objectCode;
 	}
-
+	
+	//Replaces operands according to SYMTAB and *.
+	public void replaceOperands(){
+		if(operand1.equals("*"))operand1 = locctr;
+		else if(isSymbol(operand1))operand1 = findSymbolAddress(operand1);
+		if(operand2.equals("*"))operand2 = locctr;
+		else if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
+	}
+	
 	public void writeReferRec(){
 		printToRecord("\nR");
 		int length = 0;
