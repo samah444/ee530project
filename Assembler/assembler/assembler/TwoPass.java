@@ -44,7 +44,7 @@ public class TwoPass
 		// successive elements of ALStream object
 
 		// i.e.  Y O U R  C O D E ! ! ! !
-
+		
 		firstPass();
 		fillSymTabWithRegisters();
 		secondPass();
@@ -131,7 +131,7 @@ public class TwoPass
 					else{
 						//SEARCHES FOR "BASE" AND SETS IT, IF FOUND.
 						searchAndProcessBase(interMediateAssemblyLine);
-						//SEARCHES FOR SYMBOLS AND '*' IN OPERANDS AND REPLACE
+						//SEARCHES FOR SYMBOLS, LITERALS and '*' IN OPERANDS AND REPLACE
 						replaceOperands();
 						//IF BYTE OR WORD
 						if(interMediateAssemblyLine.getOpmnemonic().equals("BYTE")
@@ -413,15 +413,19 @@ public class TwoPass
 		if (objectCode.equals("000000"))return "";
 		else return objectCode;
 	}
-	
-	//Replaces operands according to SYMTAB and *.
+
+	//Replaces operands according to SYMTAB,'*' and LITTAB.
 	public void replaceOperands(){
-		if(operand1.equals("*"))operand1 = locctr;
-		else if(isSymbol(operand1))operand1 = findSymbolAddress(operand1);
-		if(operand2.equals("*"))operand2 = locctr;
+		//OPERAND1
+		if(operand1.contains("="))operand1 = findLiteralAddress(operand1);
+		else if (operand1.equals("*"))operand1 = locctr;
+		else if (isSymbol(operand1))operand1 = findSymbolAddress(operand1);
+		//OPERAND2
+		if(operand2.contains("="))operand2 = findLiteralAddress(operand2);
 		else if(isSymbol(operand2))operand2 = findSymbolAddress(operand2);
+		else if(operand2.equals("*"))operand2 = locctr;
 	}
-	
+
 	public void writeReferRec(){
 		printToRecord("\nR");
 		int length = 0;
@@ -503,7 +507,7 @@ public class TwoPass
 	//Corrects the length in the text record.
 	public void fixLengthInTextRecord(){
 		char[] objectCodeArray = objectCodeString.toCharArray();
-		
+
 		String hex = intToHex((lengthOfTextRec - 9)/2);
 		char[] tempCharArray = hex.toCharArray();
 		objectCodeString = "";
@@ -516,9 +520,9 @@ public class TwoPass
 			objectCodeArray[8]=(hex.toCharArray())[1];	
 		}
 		objectCodeString = new String(objectCodeArray);
-//		for(int i = 0; i<objectCodeArray.length; i++){
-//			objectCodeString += objectCodeArray[i]; 
-//		}
+		//		for(int i = 0; i<objectCodeArray.length; i++){
+		//			objectCodeString += objectCodeArray[i]; 
+		//		}
 	}
 
 	//Writes the given objectCode to record and increases the lengthOfTextRec.
@@ -570,6 +574,12 @@ public class TwoPass
 		Symbol aSymbol = symTab.get(operand);
 		if (aSymbol == null){return "";}//TODO: Throw undefined Symbol exception. Set error flag?
 		else return aSymbol.getAddress();	
+	}
+	
+	public String findLiteralAddress(String operand){
+		Literal aLiteral = litTab.get(operand);
+		if(aLiteral == null){return "";}//TODO: Throw undefined Literal exception.?
+		else return aLiteral.getAddress();
 	}
 
 	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
@@ -730,12 +740,15 @@ public class TwoPass
 	public int findNumberOfBytesInConstant(String constant){
 		int LengthOfByte;
 		char[] byteContent = constant.toCharArray();
+		if(byteContent[0] == '='){
+			constant = constant.substring(1);
+			byteContent = constant.toCharArray();
+		}
 		if(byteContent[0]== 'X'){
 			LengthOfByte = ((constant.length()-3)/2);
 		}
 		else LengthOfByte = (constant.length()-3);
 		return LengthOfByte;
-
 	}
 	public void printToRecord(String objectCode){
 		//		Takes an objectcode string and prints it as a new line in the RecordFile
