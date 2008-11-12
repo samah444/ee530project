@@ -13,7 +13,23 @@ public class Simen {
 	private int lengthOfTextRec;
 	private String objectCodeString;
 	private AL interMediateAssemblyLine;
+	private HashMap<String, Literal> litTab = new HashMap<String, Literal>();
+
+	//literalobject . getvalue
+	//g¨r gjennom littab, kaller writeObjectcode
+	//input, value in littab
+	//insertLiterals
 	
+	public void insertLiterals(){
+		while(true){
+
+		}
+	}
+
+	public String stripToValue(String string){
+		return string.substring(string.indexOf("'")+1).substring(0, string.indexOf("'"));	
+	}
+
 	public void writeReferRec(){
 		printToRecord("\nR");
 		int length = 0;
@@ -34,7 +50,7 @@ public class Simen {
 	}
 
 	public void writeDefineRec(AL interMediateAssemblyLine){
-		
+
 		printToRecord("\nD");
 		int length = 0;
 		String operand = interMediateAssemblyLine.getOperand1();
@@ -46,17 +62,17 @@ public class Simen {
 			while(symbol.length()<6) symbol += " ";
 			printToRecord(symbol + address);
 			length++;
-			
+
 			if(length==6){ 
 				printToRecord("\nD");
 				length = 0;
 			}
-			
+
 			operand = operand.substring(index+1);
 			if(index==-1) break;
 		}
 	}
-	
+
 	public void fixLengthInTextRecord(){
 		char[] objectCodeArray = objectCodeString.toCharArray();
 		String hex = intToHex(lengthOfTextRec-9);
@@ -66,10 +82,10 @@ public class Simen {
 		}
 		else
 			objectCodeArray[8]=(hex.toCharArray())[0];
-			objectCodeArray[9]=(hex.toCharArray())[1];	
+		objectCodeArray[9]=(hex.toCharArray())[1];	
 	}
 
-	
+
 	//Will objecCode fit into current TextRecord? True if Yes, False otherwise.
 	public boolean fitIntoTextRec(String objectCode){
 		if((objectCode.length()+lengthOfTextRec)<70)
@@ -97,7 +113,6 @@ public class Simen {
 		for(int i = 2; i<constant.length()-1; i++){
 			content += byteContent[i];
 			decContent = Integer.parseInt("" + content);
-			//if(byteContent[0]=='C') hex += intToHex(decContent);
 			hex += intToHex(decContent);
 		}
 		if(byteContent[0]=='C') return hex;
