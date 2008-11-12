@@ -6,14 +6,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
+import java.util.Iterator;
 import java.util.ListIterator;
 
 public class Magnus {
 
+	private Iterator<String> litIter;
+	private HashMap<String, Literal> litTab = new HashMap<String, Literal>();
+
+	private ListIterator<InterMediateLine> iter;
 	private ALStream alstr;
 	private AL assemblyLine;
 	private AL interMediateAssemblyLine;
-	private ListIterator<InterMediateLine> iter;
 	private Integer disp = 0;
 	private Boolean baseFlag;
 	private String startAddress, programLength, locctr, targetAddress, base;
@@ -21,7 +25,7 @@ public class Magnus {
 	private String operand1, operand2;
 	private ArrayList<InterMediateLine> intermediateLines = new ArrayList<InterMediateLine>();
 
-	Boolean isPCPossible(){
+	public Boolean isPCPossible(){
 		//		When program-counter relative mode is used, disp
 		//		is a 12-bits signed integer
 		//		2’s complement
@@ -33,7 +37,41 @@ public class Magnus {
 			return true;
 		else return false;
 	}
-	Boolean isBasePossible(){
+
+	public String stripToValue(String string){
+		return string.substring(string.indexOf("'")+1).substring(0, string.indexOf("'"));	
+	}
+	
+	public void literals(AL assemblyLine){
+		//		Searching for literans and adding to LITTAB if found
+		if(assemblyLine.getOperand1().toCharArray()[0] == '='){
+			if(litTab.containsKey(assemblyLine.getOperand1())){
+				//						TODO: finne ut korsjen vi kasta skikkeelige exeptions
+				//						throw new IllegalDuplicateError;
+			}
+			else{
+				Literal lit = new Literal(locctr, stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
+				litTab.put(assemblyLine.getOperand1(), lit);
+			}
+		}
+		else if(assemblyLine.getOpmnemonic().equals("LTORG")){
+
+			litIter = litTab.keySet().iterator();
+			
+			while(litIter.hasNext()){
+				String litIterString = litIter.next();
+				Literal tempLit = litTab.get(litIterString);
+		
+				tempLit.setAddress(locctr);
+				
+				litTab.put(litIterString , tempLit);
+				
+				hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));			
+			}
+		} 
+	}
+
+	public Boolean isBasePossible(){
 		//		When base relative mode is used, disp is a 12-bits
 		//		unsigned integer
 
@@ -45,14 +83,14 @@ public class Magnus {
 		else return false;
 	}
 
-	public static String intToHex(int inputFromUser){
+	public String intToHex(int inputFromUser){
 		//		Takes a decimal int from user and converts it to hex and returns string
 
 		int i = inputFromUser;
 		String s = Integer.toHexString(i);
 		return s;
 	}
-	public static void printToRecord(String objectCode){
+	public void printToRecord(String objectCode){
 		//		Takes an objectcode string and prints it as a new line in the RecordFile
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter("RecordFile", true));
@@ -67,7 +105,7 @@ public class Magnus {
 	public void passOne(){
 
 		assemblyLine = alstr.nextAL();
-		
+
 
 		if (assemblyLine.getOpmnemonic() == "START"){
 
@@ -75,20 +113,20 @@ public class Magnus {
 			while(startAddress.length() < 6) startAddress = "0" + startAddress;
 
 			locctr = intToHex((Integer.parseInt(startAddress)));
-			
+
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 			intermediateLines.add(currentInterMediateLine);
-			
+
 			assemblyLine = alstr.nextAL();
 		}
 		else locctr = "000000";
-		
-		
-		
+
+
+
 		while(!alstr.atEnd()){
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 			intermediateLines.add(currentInterMediateLine);
-			
+
 			if(!assemblyLine.isFullComment()){
 				if(assemblyLine.getLabel() != ""){
 					if(symTab.containsKey(assemblyLine.getLabel())){
@@ -105,7 +143,7 @@ public class Magnus {
 				}
 				//				else throw new InvalidOpcode;
 			}
-			
+
 			assemblyLine = alstr.nextAL();
 		}
 		String programLength = hexMath(locctr, '-' ,startAddress);
@@ -191,13 +229,13 @@ public class Magnus {
 				b="0";
 
 				//			getting the PC from next lines locctr then resetting the locctr
-				
-				
-				
+
+
+
 				InterMediateLine currentInterMediateLine = iter.next();
 				interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
 				programCounter = currentInterMediateLine.getLocctr();				
-				
+
 				currentInterMediateLine = iter.previous();	
 
 				//			setting disp for PC-relative(=TA-PC)
@@ -260,14 +298,14 @@ public class Magnus {
 		if (aSymbol == null){return "";}//TODO: Throw undefined Symbol exception. Set error flag?
 		else return aSymbol.getAddress();	
 	}
-//	public void makeAlToArrayList(){
-//		ArrayList assemblyLines = new ArrayList();
-//		while(!alstr.atEnd()){
-//			assemblyLine = alstr.nextAL();
-//			correctLOCCTR(assemblyLine);
-//			assemblyLines.add(Integer.parseInt(locctr), assemblyLine)
-//		}
-//		
-//	}
+	//	public void makeAlToArrayList(){
+	//		ArrayList assemblyLines = new ArrayList();
+	//		while(!alstr.atEnd()){
+	//			assemblyLine = alstr.nextAL();
+	//			correctLOCCTR(assemblyLine);
+	//			assemblyLines.add(Integer.parseInt(locctr), assemblyLine)
+	//		}
+	//		
+	//	}
 
 }
