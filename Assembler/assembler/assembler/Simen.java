@@ -15,6 +15,7 @@ public class Simen {
 	private AL interMediateAssemblyLine;
 	private HashMap<String, Literal> litTab = new HashMap<String, Literal>();
 
+	//Takes out the string between the to singel quotes
 	public String stripToValue(String string){
 		return string.substring(string.indexOf("'")+1).substring(0, string.indexOf("'"));	
 	}
@@ -93,7 +94,8 @@ public class Simen {
 		}
 	}
 
-	//Overfører bokstavene i formen X'ABC' eller C'ABC' til hex
+	//Takes the string between the to single quotes
+	//and convert it to a hex value if its a char.
 	public String constantToHex(String constant){
 		int decContent = 0;
 		String content = "";
@@ -125,12 +127,12 @@ public class Simen {
 		}
 	}
 
-
+	//find the length of the string between the to single quotes
+	//and return the number of bytes it contains
 	public int findNumberOfBytesInConstant(String constant){
 		int LengthOfByte;
 		char[] byteContent = constant.toCharArray();
-		//if(constant.equals("BYTE")){
-
+		
 		if(byteContent[0]== 'X'){
 			LengthOfByte = ((constant.length()-3)/2);
 		}
