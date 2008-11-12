@@ -179,8 +179,10 @@ public class Magnus {
 		else locctr = "000000";
 
 		while(!alstr.atEnd()){
-			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
-			intermediateLines.add(currentInterMediateLine);
+
+				InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
+				intermediateLines.add(currentInterMediateLine);
+			
 
 			if(!assemblyLine.isFullComment()){
 				if(assemblyLine.getLabel() != ""){
@@ -197,43 +199,28 @@ public class Magnus {
 					correctLOCCTR(assemblyLine);
 				}			
 				searchLiterals(assemblyLine);
-				if(assemblyLine.getOpmnemonic() == "END"){
-					litIter = litTab.keySet().iterator();
-
-					while(litIter.hasNext()){
-						String litIterString = litIter.next();
-						Literal tempLit = litTab.get(litIterString);
-
-						if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
-
-						litTab.put(litIterString , tempLit);
-
-						locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
-					}
-				}
 			}
 
 			assemblyLine = alstr.nextAL();
 		}
 
-		if (alstr.atEnd() || assemblyLine.getOpmnemonic() == "END"){
+
+		litIter = litTab.keySet().iterator();
+
+		while(litIter.hasNext()){
+			String litIterString = litIter.next();
+			Literal tempLit = litTab.get(litIterString);
+
+			if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
+
+			litTab.put(litIterString , tempLit);
+
+			locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
+		}
+
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 			intermediateLines.add(currentInterMediateLine);
-
-			litIter = litTab.keySet().iterator();
-
-			while(litIter.hasNext()){
-				String litIterString = litIter.next();
-				Literal tempLit = litTab.get(litIterString);
-
-				if(tempLit.getAddress().equals("")) tempLit.setAddress(locctr);
-
-				litTab.put(litIterString , tempLit);
-
-				locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
-			}
-
-		}
+		
 
 		programLength = hexMath(locctr, '-' ,startAddress);
 		while(programLength.length() < 6) programLength = "0" + programLength;
