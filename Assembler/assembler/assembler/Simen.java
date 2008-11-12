@@ -22,6 +22,7 @@ public class Simen {
 	
 	public void insertLiterals(){
 		while(true){
+			//litTab.get
 
 		}
 	}
