@@ -1,10 +1,9 @@
-/*
+/**
 * @author Simen Hammerseth
 * @author Magnus Lervaag
 * @author Andreas Urke
 * @version 11.12.2008
 * @see TwoPass
-*
 * 
 * Symbol contains all the info about a symbol as defined by the programmer in
 * the source code. It also provides getters and setter for the info.
@@ -15,9 +14,6 @@ package assembler;
 //TODO:slette noen av setterane når vi ser vi ikke får bruk for dei
 //TODO:enums for flag og type?
 
-/**
- * The Class Symbol.
- */
 public class Symbol {
 	
 	private int length;
