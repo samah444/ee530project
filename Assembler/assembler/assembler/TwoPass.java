@@ -36,6 +36,7 @@ public class TwoPass
 	private String operand2;
 	private String objectCode = "";
 	private boolean ltorg = false;
+	private boolean ltorgRun = false;
 	private String ltorgLOCCTR = "0";
 
 
@@ -102,6 +103,7 @@ public class TwoPass
 			assemblyLine = alstr.nextAL();
 		}
 
+		
 		litIter = litTab.keySet().iterator();
 
 		while(litIter.hasNext()){
@@ -112,11 +114,11 @@ public class TwoPass
 
 			litTab.put(litIterString , tempLit);
 
-			hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
+			locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));	
 		}
-
 		InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 		intermediateLines.add(currentInterMediateLine);
+		
 		programLength = hexMath(locctr, '-' ,startAddress);
 		while(programLength.length() < 6) programLength = "0" + programLength;
 	}
@@ -131,6 +133,7 @@ public class TwoPass
 			locctr = currentInterMediateLine.getLocctr();
 			assemblyLine = alstr.nextAL();
 			//IF OPCODE IS NOT END
+
 			if(!interMediateAssemblyLine.getOpmnemonic().equals("LTORG")){
 				if(!interMediateAssemblyLine.getOpmnemonic().equals("END")){
 					if(interMediateAssemblyLine.getOpmnemonic().equals("EXTREF"))writeReferRec();
@@ -185,19 +188,30 @@ public class TwoPass
 				}
 				//IF OPCODE = END
 				else {
-					if(ltorg == false)insertLiterals();
+					if(ltorg == false){
+						printToOverviewFile(currentInterMediateLine);
+						ltorgRun = true;
+						insertLiterals();
+					}
 					fixLengthInTextRecord();
 					printToRecord(objectCodeString);
 					printEndRecord();
 				}
 				//ALWAYS DO
 				interMediateAssemblyLine.setAssembledOpcode(objectCode);
-				printToOverviewFile(currentInterMediateLine);
+				if(!ltorgRun)printToOverviewFile(currentInterMediateLine);
+				ltorgRun = false;
+				
 			}
 			//IF OPMNEMONIC = LTORG
-			insertLiterals();
-			ltorgLOCCTR = locctr;
-			ltorg = true;
+			else{
+				insertLiterals();
+				ltorgLOCCTR = locctr;
+				ltorg = true;
+			}
+
+
+
 		}
 	}
 
@@ -226,7 +240,7 @@ public class TwoPass
 
 				litTab.put(litIterString , tempLit);
 
-				hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));			
+				locctr = hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(litIterString)));			
 			}
 		} 
 
@@ -237,9 +251,9 @@ public class TwoPass
 		while(litIter.hasNext()){
 			String litName = litIter.next();
 			Literal tempLit = litTab.get(litName);
-			if((Integer.parseInt(tempLit.getAddress(),16))<(Integer.parseInt(locctr,16)) 
+			if((Integer.parseInt(tempLit.getAddress(),16))<=(Integer.parseInt(locctr,16)) 
 					&& (Integer.parseInt(tempLit.getAddress(),16)>(Integer.parseInt(ltorgLOCCTR,16)))){
-				objectCode = constantToHex(tempLit.getValue());
+				objectCode = constantToHex(litName);
 				if(fitIntoTextRec(objectCode)){
 					writeObjectCode(objectCode);
 				}
@@ -250,8 +264,14 @@ public class TwoPass
 					writeObjectCode(objectCode);
 				}
 				try {
-					outOverview.write("\t"+tempLit.getAddress()+"\t");
-					outOverview.write("*\t\t"+litName+"\t\t\t"+objectCode);
+					if(interMediateAssemblyLine.getOpmnemonic().equals("LTORG")){
+						outOverview.write(lineNumber + "\t\t\t\t\t\t" + "LTORG\n");
+						lineNumber++;
+					}
+
+					outOverview.write("\t"+correctFormat(tempLit.getAddress())+"\t");
+					outOverview.write("*\t\t\t="+litName+"\t\t\t"+objectCode + "\n");
+					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -727,8 +747,7 @@ public class TwoPass
 
 			//IF COMMENT
 			if(assemblyLine.isFullComment())
-				//TODO: Skaffe CommentText. Den er Private i AL. Mail til lewis?
-				outOverview.write("CommentText");
+				outOverview.write(assemblyLine.getComment());
 			//IF NOT COMMENT
 			else{
 				//LOCCTR
@@ -748,7 +767,7 @@ public class TwoPass
 				//IF NOT LITERAL
 				else {
 					//OPMNEMONIC
-					outOverview.write(assemblyLine.getOpmnemonic() + "\t");
+					outOverview.write(assemblyLine.getOpmnemonic() + "\t\t");
 					//IF ADDRESSING
 					if(assemblyLine.isIndirect())outOverview.write("@");
 					else if(assemblyLine.isImmediate())outOverview.write("#");
@@ -827,10 +846,10 @@ public class TwoPass
 	public int findNumberOfBytesInConstant(String constant){
 		int LengthOfByte;
 		char[] byteContent = constant.toCharArray();
-//		if(byteContent[0] == '='){
-//			constant = constant.substring(1);
-//			byteContent = constant.toCharArray();
-//		}TODO:FJERNE?
+		//		if(byteContent[0] == '='){
+		//			constant = constant.substring(1);
+		//			byteContent = constant.toCharArray();
+		//		}TODO:FJERNE?
 		if(byteContent[0]== 'X'){
 			LengthOfByte = ((constant.length()-3)/2);
 		}
