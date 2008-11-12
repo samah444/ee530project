@@ -196,6 +196,7 @@ public class TwoPass
 			}
 			//IF OPMNEMONIC = LTORG
 			insertLiterals();
+			ltorgLOCCTR = locctr;
 			ltorg = true;
 		}
 	}
@@ -232,13 +233,20 @@ public class TwoPass
 	public void insertLiterals(){
 		litIter = litTab.keySet().iterator();
 		while(litIter.hasNext()){
-			String litIterString = litIter.next();
-			Literal tempLit = litTab.get(litIterString);
+			Literal tempLit = litTab.get(litIter.next());
 			if((Integer.parseInt(tempLit.getAddress(),16))<(Integer.parseInt(locctr,16)) 
 					&& (Integer.parseInt(tempLit.getAddress(),16)>(Integer.parseInt(ltorgLOCCTR,16)))){
-				
-				//Insert hond her
-			
+				objectCode = constantToHex(tempLit.getValue());
+				if(fitIntoTextRec(objectCode)){
+					writeObjectCode(objectCode);
+				}
+				else{
+					fixLengthInTextRecord();
+					printToRecord(objectCodeString);
+					initializeTextRecord();
+					writeObjectCode(objectCode);
+				}
+
 			}
 		}
 	}
