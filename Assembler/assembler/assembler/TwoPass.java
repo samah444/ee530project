@@ -1,4 +1,4 @@
-/*
+/**
  * @author Simen Hammerseth
  * @author Magnus Lervaag
  * @author Andreas Urke
