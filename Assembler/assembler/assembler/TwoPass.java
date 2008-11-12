@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.ListIterator;
 
 
@@ -21,6 +22,7 @@ public class TwoPass
 	private String locctr = "000000";
 	private ArrayList<InterMediateLine> intermediateLines = new ArrayList<InterMediateLine>();
 	private boolean baseFlag = false;
+	private Iterator<String> litIter;
 	private ListIterator<InterMediateLine> iter;
 	private String base = "";
 	private String objectCodeString = "";
@@ -74,8 +76,6 @@ public class TwoPass
 		}
 		else locctr = "000000";
 
-
-
 		while(!alstr.atEnd()){
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 			intermediateLines.add(currentInterMediateLine);
@@ -91,14 +91,28 @@ public class TwoPass
 						symTab.put(assemblyLine.getLabel(), sym);
 					}
 				}
-				if(assemblyLine.getOpmnemonic() != ""){
+				if(assemblyLine.getOpmnemonic() != "" || assemblyLine.getOpmnemonic() != "LTORG"){
 					correctLOCCTR(assemblyLine);
-				}
-				//				else throw new InvalidOpcode;
+				}			
+				searchLiterals(assemblyLine);
 			}
 
 			assemblyLine = alstr.nextAL();
 		}
+		
+		litIter = litTab.keySet().iterator();
+		
+		while(litIter.hasNext()){
+			String litIterString = litIter.next();
+			Literal tempLit = litTab.get(litIterString);
+	
+			tempLit.setAddress(locctr);
+			
+			litTab.put(litIterString , tempLit);
+			
+			hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));	
+		}
+		
 		InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 		intermediateLines.add(currentInterMediateLine);
 		programLength = hexMath(locctr, '-' ,startAddress);
@@ -176,6 +190,35 @@ public class TwoPass
 			interMediateAssemblyLine.setAssembledOpcode(objectCode);
 			printToOverviewFile(currentInterMediateLine);
 		}
+	}
+	
+	public void searchLiterals(AL assemblyLine){
+		//		Searching for literans and adding to LITTAB if found
+		if(assemblyLine.getOperand1().toCharArray()[0] == '='){
+			if(litTab.containsKey(assemblyLine.getOperand1())){
+				//						TODO: finne ut korsjen vi kasta skikkeelige exeptions
+				//						throw new IllegalDuplicateError;
+			}
+			else{
+				Literal lit = new Literal(locctr, stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
+				litTab.put(assemblyLine.getOperand1(), lit);
+			}
+		}
+		else if(assemblyLine.getOpmnemonic().equals("LTORG")){
+
+			litIter = litTab.keySet().iterator();
+			
+			while(litIter.hasNext()){
+				String litIterString = litIter.next();
+				Literal tempLit = litTab.get(litIterString);
+		
+				tempLit.setAddress(locctr);
+				
+				litTab.put(litIterString , tempLit);
+				
+				hexMath(locctr, '+', Integer.toHexString(findNumberOfBytesInConstant(tempLit.getValue())));			
+			}
+		} 
 	}
 
 	//	Makes object code
@@ -609,6 +652,9 @@ public class TwoPass
 		else return content;
 	}
 
+	public String stripToValue(String string){
+		return string.substring(string.indexOf("'")+1).substring(0, string.indexOf("'"));	
+	}
 
 	//Creates the header record and prints it to file.
 	public void printHeaderRecord(AL assemblyLine){
