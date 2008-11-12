@@ -10,10 +10,6 @@
 */
 package assembler;
 
-//TODO:what the hell is type and length for. har vi bruk for dei
-//TODO:slette noen av setterane når vi ser vi ikke får bruk for dei
-//TODO:enums for flag og type?
-
 public class Symbol {
 	
 	private int length;

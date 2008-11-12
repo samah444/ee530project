@@ -14,9 +14,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
 
-
-// TODO: Auto-generated Javadoc
-//You'll be filling this one out
 /**
  * The Class TwoPass.
  */
@@ -63,11 +60,6 @@ public class TwoPass
 	 */
 	public void assemble()
 	{
-		// 2 pass algorithm to assemble the "code" in
-		// successive elements of ALStream object
-
-		// i.e.  Y O U R  C O D E ! ! ! !
-
 		firstPass();
 		fillSymTabWithRegisters();
 		secondPass();
@@ -76,19 +68,20 @@ public class TwoPass
 			outOverview.close();
 			outRecord.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Error writing output.");
 			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * First pass.
 	 */
 	public void firstPass(){
-		
+
 		while(!alstr.atEnd()){
 
 			assemblyLine = alstr.nextAL();
-			
+
 			if (assemblyLine.getOpmnemonic() == "START"){
 
 				startAddress = assemblyLine.getOperand1();
@@ -104,22 +97,27 @@ public class TwoPass
 
 			else if(!assemblyLine.isFullComment()){
 				if(assemblyLine.getLabel() != ""){
-					if(symTab.containsKey(assemblyLine.getLabel())){
-						//						TODO: finne ut korsjen vi kasta skikkeelige exeptions
-						//						throw new IllegalDuplicateError;
+					try{
+						if(symTab.containsKey(assemblyLine.getLabel())){
+							throw new IllegalStateException();
+						}
+						else {
+							Symbol sym = new Symbol(locctr, "", 0, 0);
+							symTab.put(assemblyLine.getLabel(), sym);
+						}
 					}
-					else {
-						Symbol sym = new Symbol(locctr, "", 0, 0);
-						symTab.put(assemblyLine.getLabel(), sym);
+					catch (IllegalStateException e){
+						System.out.println("Duplicate symbol for symbol: " + assemblyLine.getLabel());
+						System.exit(0);
 					}
 				}
-		
+
 				searchLiterals(assemblyLine);
 			}
-			
+
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 			intermediateLines.add(currentInterMediateLine);
-					
+
 			correctLOCCTR(assemblyLine);
 
 		}
@@ -170,8 +168,9 @@ public class TwoPass
 								try {
 									objectCode = makeObjectCode(interMediateAssemblyLine);
 								} catch (IOException e) {
-									// TODO Auto-generated catch block
+									System.out.println("Error writing to record for line: " + lineNumber);
 									e.printStackTrace();
+									System.exit(0);
 								}
 							}
 							//WRITE TO TEXTRECORD
@@ -231,13 +230,18 @@ public class TwoPass
 		//		Searching for literans and adding to LITTAB if found
 
 		if(assemblyLine.isLiteral()){
-			if(litTab.containsKey(assemblyLine.getOperand1())){
-				//						TODO: finne ut korsjen vi kasta skikkeelige exeptions
-				//						throw new IllegalDuplicateError;
+			try{
+				if(litTab.containsKey(assemblyLine.getOperand1())){
+					throw new IllegalStateException();
+				}
+				else{
+					Literal lit = new Literal("", stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
+					litTab.put(assemblyLine.getOperand1(), lit);
+				}
 			}
-			else{
-				Literal lit = new Literal("", stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
-				litTab.put(assemblyLine.getOperand1(), lit);
+			catch (IllegalStateException e){
+				System.out.println("Duplicate literal for symbol: " + assemblyLine.getOperand1());
+				System.exit(0);
 			}
 		}
 		else if(assemblyLine.getOpmnemonic().equals("LTORG") || assemblyLine.getOpmnemonic().equals("END")){
@@ -259,7 +263,7 @@ public class TwoPass
 	}
 
 	/**
-	 * Insert literals.
+	 * Declares the literals from the LITTAB into the objectCode.
 	 */
 	public void insertLiterals(){
 		litIter = litTab.keySet().iterator();
@@ -288,13 +292,14 @@ public class TwoPass
 					outOverview.write("*\t\t="+litName+"\t\t\t"+objectCode + "\n");
 
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					System.out.println("Error printing to overview file at line: " + lineNumber);
 					e.printStackTrace();
+					System.exit(0);
 				}	
 			}
 		}
 	}
-	
+
 	/**
 	 * Makes object code.
 	 * @param assemblyLine the assembly line
@@ -647,7 +652,7 @@ public class TwoPass
 			base = "";
 		}
 	}
-	
+
 	/**
 	 * Corrects the length in the current text record.
 	 */
@@ -666,9 +671,6 @@ public class TwoPass
 			objectCodeArray[9]=(hex.toCharArray())[1];	
 		}
 		objectCodeString = new String(objectCodeArray);
-		//		for(int i = 0; i<objectCodeArray.length; i++){
-		//			objectCodeString += objectCodeArray[i]; 
-		//		}
 	}
 
 	/**
@@ -702,12 +704,11 @@ public class TwoPass
 		objectCodeString = "\nT" +  locctr + "00";
 		lengthOfTextRec += 9;
 	}
-	
+
 	/**
-	 * /Corrects the format of the string to 6 alphanumerical.
+	 * /Corrects the format of the string to six alphanumerical.
 	 * 
 	 * @param string The string to correct
-	 * 
 	 * @return The corrected string
 	 */
 	public String correctFormat(String string){
@@ -725,14 +726,13 @@ public class TwoPass
 	/**
 	 * Returns true if operand is a Symbol, false otherwise.
 	 *
-	 * @param operand the operand
-	 * @return true, if is symbol
+	 * @param operand The operand to search
+	 * @return boolean True, if operand is symbol
 	 */
 	public boolean isSymbol(String operand){
-		//Pattern star = Pattern.compile("\h2A");
 		if(!operand.equals("")){
 			if(((operand.matches("[a-zA-Z]*"))&&
-					(!operand.matches(".'")))){// || (operand.matches("*"))){
+					(!operand.matches(".'")))){
 				return true;
 			}
 			else return false;
@@ -741,27 +741,41 @@ public class TwoPass
 	}
 
 	/**
-	 * Find symbol address.
+	 * Find symbol address from symbTab and return it.
 	 * 
-	 * @param operand the operand
-	 * @return the string
+	 * @param operand The symbol to find address to.
+	 * @return string The symbol address.
 	 */
 	public String findSymbolAddress(String operand){
 		Symbol aSymbol = symTab.get(operand);
-		if (aSymbol == null){return "";}//TODO: Throw undefined Symbol exception. Set error flag?
-		else return aSymbol.getAddress();	
+		try{
+			if (aSymbol == null)throw new NullPointerException();
+			else return aSymbol.getAddress();
+		}
+		catch (NullPointerException e){
+			System.out.println("Undefined symbol for symbol: " +  operand);
+			System.exit(0);
+		}
+		return "";
 	}
 
 	/**
-	 * Find literal address.
+	 * Find literal address based on the given literal, and the LITTAB.
 	 * 
 	 * @param operand The operand
 	 * @return The literal address.
 	 */
 	public String findLiteralAddress(String operand){
 		Literal aLiteral = litTab.get(operand);
-		if(aLiteral == null){return "";}//TODO: Throw undefined Literal exception.?
-		else return aLiteral.getAddress();
+		try{
+			if(aLiteral == null)throw new NullPointerException();
+			else return aLiteral.getAddress();
+		}
+		catch (NullPointerException e){
+			System.out.println("Undefined literal for literal: " +  operand);
+			System.exit(0);
+		}
+		return "";
 	}
 
 	/**
@@ -810,7 +824,6 @@ public class TwoPass
 		}
 		while(programName.length() < 7) programName += " ";
 		if(shortened){
-			//TODO: kanskje annen behandling av dette
 			System.out.println("Program name too long, has been cut to: "
 					+ programName);
 		}
@@ -839,7 +852,7 @@ public class TwoPass
 			else{
 				//LOCCTR
 				if(!assemblyLine.getOpmnemonic().equals("END"))
-						outOverview.write((correctFormat(iAssemblyLine.getLocctr())) + "\t");
+					outOverview.write((correctFormat(iAssemblyLine.getLocctr())) + "\t");
 				else outOverview.write("\t\t");
 				//LABEL
 				outOverview.write(assemblyLine.getLabel() + "\t");
@@ -899,14 +912,13 @@ public class TwoPass
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Error printing to Overview text file.");
+			System.exit(0);
 		}
-
 	}
 
 
-
 	/**
-	 * 	Sets the LOCCTR to its correct position.
+	 * 	Sets the LOCCTR to its correct position based on the current assemblyLine.
 	 * 
 	 * @param assemblyLine The current assembly line
 	 */
@@ -953,7 +965,7 @@ public class TwoPass
 		else LengthOfByte = (constant.length()-3);
 		return LengthOfByte;
 	}
-	
+
 	/**
 	 * Prints the to record.
 	 * 
@@ -966,9 +978,12 @@ public class TwoPass
 				outRecord = new BufferedWriter(new FileWriter("Record", true));
 			outRecord.write(objectCode);
 		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("Error printing to Record file.");
+			System.exit(0);
 		}
 	}
-	
+
 	/**
 	 * Checks if pc is possible.
 	 * 
@@ -1009,7 +1024,7 @@ public class TwoPass
 			return true;
 		else return false;
 	}
-	
+
 	/**
 	 * Checks if base possible.
 	 * 

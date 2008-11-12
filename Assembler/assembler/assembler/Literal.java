@@ -4,13 +4,11 @@
  * @author Andreas Urke
  * @version 11.12.2008
  * @see TwoPass
+ * 
+ *  The Class Literal represents a Literal and provides getters and setters for its fields.
  */
 package assembler;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class Literal.
- */
 public class Literal {
 	private int length;
 	private String value;
