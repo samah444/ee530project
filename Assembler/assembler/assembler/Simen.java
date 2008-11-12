@@ -15,18 +15,6 @@ public class Simen {
 	private AL interMediateAssemblyLine;
 	private HashMap<String, Literal> litTab = new HashMap<String, Literal>();
 
-	//literalobject . getvalue
-	//g¨r gjennom littab, kaller writeObjectcode
-	//input, value in littab
-	//insertLiterals
-	
-	public void insertLiterals(){
-		while(true){
-			//litTab.get
-
-		}
-	}
-
 	public String stripToValue(String string){
 		return string.substring(string.indexOf("'")+1).substring(0, string.indexOf("'"));	
 	}
