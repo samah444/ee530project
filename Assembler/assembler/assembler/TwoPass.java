@@ -233,7 +233,8 @@ public class TwoPass
 	public void insertLiterals(){
 		litIter = litTab.keySet().iterator();
 		while(litIter.hasNext()){
-			Literal tempLit = litTab.get(litIter.next());
+			String litName = litIter.next();
+			Literal tempLit = litTab.get(litName);
 			if((Integer.parseInt(tempLit.getAddress(),16))<(Integer.parseInt(locctr,16)) 
 					&& (Integer.parseInt(tempLit.getAddress(),16)>(Integer.parseInt(ltorgLOCCTR,16)))){
 				objectCode = constantToHex(tempLit.getValue());
@@ -246,7 +247,13 @@ public class TwoPass
 					initializeTextRecord();
 					writeObjectCode(objectCode);
 				}
-
+				try {
+					outOverview.write("\t"+tempLit.getAddress()+"\t");
+					outOverview.write("*\t\t"+litName+"\t\t\t"+objectCode);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
 			}
 		}
 	}
