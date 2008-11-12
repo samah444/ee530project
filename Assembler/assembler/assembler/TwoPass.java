@@ -558,7 +558,7 @@ public class TwoPass
 	}
 
 	/**
-	 * Write refer rec.
+	 * Produce R records in object program
 	 */
 	public void writeReferRec(){
 		printToRecord("\nR");
@@ -582,7 +582,7 @@ public class TwoPass
 	}
 
 	/**
-	 * Write define rec.
+	 * Produce D records in object program
 	 */
 	public void writeDefineRec(){
 
