@@ -1028,10 +1028,12 @@ public class TwoPass
 		//		Program-counter relative b=0,p=1
 		targetAddress = operand1;
 
+//		Gets the next assemblylines locctr(this lines programCounter)
 		InterMediateLine currentInterMediateLine = iter.next();
 		interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
 		String programCounter = currentInterMediateLine.getLocctr();				
 
+//		puts the cursor back to previous line
 		currentInterMediateLine = iter.previous();	
 
 		String targetAddress = this.targetAddress;
