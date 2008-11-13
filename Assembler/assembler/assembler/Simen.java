@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class Simen {
-
 	public HashMap<String, Symbol> symTab = new HashMap<String, Symbol>();
 	//private AL assemblyLine;
 	private BufferedWriter outRecord;
@@ -15,7 +14,7 @@ public class Simen {
 	private AL interMediateAssemblyLine;
 	private HashMap<String, Literal> litTab = new HashMap<String, Literal>();
 
-	//Takes out the string between the to singel quotes
+	//Takes out the string between the to single quotes
 	public String stripToValue(String string){
 		return string.substring(string.indexOf("'")+1).substring(0, string.indexOf("'"));	
 	}
@@ -62,7 +61,8 @@ public class Simen {
 			if(index==-1) break;
 		}
 	}
-
+	
+	//Sets the new value of the text record length and replace it.
 	public void fixLengthInTextRecord(){
 		char[] objectCodeArray = objectCodeString.toCharArray();
 		String hex = intToHex(lengthOfTextRec-9);
