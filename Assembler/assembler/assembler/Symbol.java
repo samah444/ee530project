@@ -1,15 +1,17 @@
+
+package assembler;
+
 /**
+* Symbol contains all the info about a symbol as defined by the programmer in
+* the source code. It also provides getters and setter for the info.
+* 
 * @author Simen Hammerseth
 * @author Magnus Lervaag
 * @author Andreas Urke
 * @version 11.12.2008
 * @see TwoPass
 * 
-* Symbol contains all the info about a symbol as defined by the programmer in
-* the source code. It also provides getters and setter for the info.
 */
-package assembler;
-
 public class Symbol {
 	
 	private int length;

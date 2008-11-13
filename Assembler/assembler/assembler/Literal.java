@@ -1,14 +1,17 @@
+
+package assembler;
+
 /**
+ * 
+ * The Class Literal represents a Literal and provides getters and setters for its fields.
+ * 
  * @author Simen Hammerseth
  * @author Magnus Lervaag
  * @author Andreas Urke
  * @version 11.12.2008
  * @see TwoPass
  * 
- *  The Class Literal represents a Literal and provides getters and setters for its fields.
  */
-package assembler;
-
 public class Literal {
 	private int length;
 	private String value;

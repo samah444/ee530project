@@ -1,9 +1,4 @@
-/**
- * @author Simen Hammerseth
- * @author Magnus Lervaag
- * @author Andreas Urke
- * @version 11.12.2008
- */
+
 package assembler;
 
 import java.io.BufferedWriter;
@@ -15,7 +10,13 @@ import java.util.Iterator;
 import java.util.ListIterator;
 
 /**
- * The Class TwoPass.
+ * The Class TwoPass does the two pass-algorithms for creating objectCode from Assembly-SourceCode
+ * 
+ * @author Simen Hammerseth
+ * @author Magnus Lervaag
+ * @author Andreas Urke
+ * @version 11.12.2008
+ * 
  */
 public class TwoPass
 {
