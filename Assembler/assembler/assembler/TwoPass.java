@@ -798,7 +798,7 @@ public class TwoPass
 	}
 
 	/**
-	 * Takes the string between the to single quotes
+	 * Takes the string between the two single quotes
 	 * and convert it to a hex value if its a char.
 	 * 
 	 * @param constant The constant
@@ -819,7 +819,7 @@ public class TwoPass
 	}
 
 	/**
-	 * Takes out the string between the to single quotes.
+	 * Takes out the string between the two single quotes.
 	 * 
 	 * @param string The string to strip.
 	 * @return The value from the string.
@@ -969,7 +969,7 @@ public class TwoPass
 	}
 
 	/**
-	 * Find the length of the string between the to single quotes
+	 * Find the length of the string between the two single quotes
 	 * and return the number of bytes it contains.
 	 * 
 	 * @param constant the constant 
