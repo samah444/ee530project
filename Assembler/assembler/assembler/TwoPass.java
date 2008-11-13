@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.concurrent.ExecutionException;
-
-import com.sun.org.apache.xerces.internal.util.SymbolTable;
 
 /**
  * The Class TwoPass.
