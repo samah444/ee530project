@@ -242,24 +242,7 @@ public class TwoPass
 	public void searchLiterals(AL assemblyLine){
 		//		Searching for literals and adding to LITTAB if found
 
-		if(assemblyLine.isLiteral()){
-			try{
-				//				searches LitTab to check if already inserted
-				if(litTab.containsKey(assemblyLine.getOperand1())){
-					throw new IllegalStateException();
-				}
-				//				Inserts literal to Littab with name value and lengt, but without address
-				else{
-					Literal lit = new Literal("", stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
-					litTab.put(assemblyLine.getOperand1(), lit);
-				}
-			}
-			catch (IllegalStateException e){
-				System.out.println("Duplicate literal for symbol: " + assemblyLine.getOperand1());
-				System.exit(0);
-			}
-		}
-		else if(assemblyLine.getOpmnemonic().equals("LTORG") || assemblyLine.getOpmnemonic().equals("END")){
+		if(assemblyLine.getOpmnemonic().equals("LTORG") || assemblyLine.getOpmnemonic().equals("END")){
 			//			makes an iterator of the keys in littab
 			litIter = litTab.keySet().iterator();
 
@@ -275,7 +258,13 @@ public class TwoPass
 
 				litTab.put(litIterString , tempLit);
 			}
-		} 
+		}
+		else if(assemblyLine.isLiteral()){
+
+			Literal lit = new Literal("", stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
+			litTab.put(assemblyLine.getOperand1(), lit);
+
+		}
 	}
 
 	/**
@@ -1028,12 +1017,12 @@ public class TwoPass
 		//		Program-counter relative b=0,p=1
 		targetAddress = operand1;
 
-//		Gets the next assemblylines locctr(this lines programCounter)
+		//		Gets the next assemblylines locctr(this lines programCounter)
 		InterMediateLine currentInterMediateLine = iter.next();
 		interMediateAssemblyLine = currentInterMediateLine.getAssemblyLine();
 		String programCounter = currentInterMediateLine.getLocctr();				
 
-//		puts the cursor back to previous line
+		//		puts the cursor back to previous line
 		currentInterMediateLine = iter.previous();	
 
 		String targetAddress = this.targetAddress;
