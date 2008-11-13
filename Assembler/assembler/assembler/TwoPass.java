@@ -233,9 +233,9 @@ public class TwoPass
 	}
 
 	/**
-	 * Search for literals and inserts them to LITTAB if not already there
-	 * Also checks if operand is LTORG or END, and if found does literal pooling
+	 * Checks if operand is LTORG or END, and if found does literal pooling
 	 * (assingning addresses to the literals not yet assigned an address)
+	 * 	Also search for literals and inserts them to LITTAB
 	 * 
 	 * @param assemblyLine the assembly line
 	 */
