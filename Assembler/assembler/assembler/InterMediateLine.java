@@ -1,6 +1,10 @@
+
+package assembler;
+
+
 /**
-* InterMediateLine contains all the info about a symbol as defined by the programmer in
-* the source code. It also provides getters and setter for the info.
+* InterMediateLine contains all the info about a assemblyLine and its correspondig location counter. 
+* It also provides getters and setter for the info.
 * 
 * @author Simen Hammerseth
 * @author Magnus Lervaag
@@ -9,14 +13,6 @@
 * @see TwoPass
 * 
 */
-package assembler;
-
-// TODO: Auto-generated Javadoc
-/**
- * The Class InterMediateLine.
- * 
- * @author Magnus
- */
 public class InterMediateLine {
 	
 	private AL assemblyLine;
