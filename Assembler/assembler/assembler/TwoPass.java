@@ -61,7 +61,7 @@ public class TwoPass
 	public void assemble()
 	{
 		firstPass();
-		fillSymTabWithRegisters();
+				
 		secondPass();
 
 		try {
@@ -81,6 +81,9 @@ public class TwoPass
 	 */
 	public void firstPass(){
 
+//		Loading all the registers and their value into symtab
+		fillSymTabWithRegisters();
+		
 		while(!alstr.atEnd()){
 
 			//			Fetches a new assemblyLine from ALStream
@@ -1075,7 +1078,7 @@ public class TwoPass
 	/**
 	 * Takes a decimal int and converts it to hex and returns string
 	 * 
-	 * @param inputFromUser The input to convert
+	 * @param input The input to convert
 	 * @return the string
 	 */
 	public String intToHex(int input){
