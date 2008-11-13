@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.concurrent.ExecutionException;
+
+import com.sun.org.apache.xerces.internal.util.SymbolTable;
 
 /**
  * The Class TwoPass.
@@ -75,13 +78,18 @@ public class TwoPass
 
 	/**
 	 * First pass.
+	 * Takes every assemblyline and inputs symbols in SymbolTable.
+	 * Also checks for literals. Stores all lines in the arraylist 
+	 * InterMediateLines for easier handling in pass two
 	 */
 	public void firstPass(){
 
 		while(!alstr.atEnd()){
 
+			//			Fetches a new assemblyLine from ALStream
 			assemblyLine = alstr.nextAL();
 
+			//			Sets Startaddress to locationcounter of opmnemonic = Start
 			if (assemblyLine.getOpmnemonic() == "START"){
 
 				startAddress = assemblyLine.getOperand1();
@@ -101,6 +109,7 @@ public class TwoPass
 						if(symTab.containsKey(assemblyLine.getLabel())){
 							throw new IllegalStateException();
 						}
+						//						Inputs every symbol to symtab with its address(current locctr)
 						else {
 							Symbol sym = new Symbol(locctr, "", 0, 0);
 							symTab.put(assemblyLine.getLabel(), sym);
@@ -111,17 +120,19 @@ public class TwoPass
 						System.exit(0);
 					}
 				}
-
+				//				checks for literals and LTORG or END statement(for literal pooling)
 				searchLiterals(assemblyLine);
 			}
 
+			//			Inputs every assemblyLine and its corresponding locctr to the aeeaylist
 			InterMediateLine currentInterMediateLine = new InterMediateLine(locctr, assemblyLine);
 			intermediateLines.add(currentInterMediateLine);
 
+			//			corrects locationcounter by looking at the bytes needed to do operation in assemblyLine
 			correctLOCCTR(assemblyLine);
 
 		}
-
+		//		Sets programlength for later use(records)
 		programLength = hexMath(locctr, '-' ,startAddress);
 		while(programLength.length() < 6) programLength = "0" + programLength;
 	}
@@ -222,18 +233,22 @@ public class TwoPass
 	}
 
 	/**
-	 * Search literals.
+	 * Search for literals and inserts them to LITTAB if not already there
+	 * Also checks if operand is LTORG or END, and if found does literal pooling
+	 * (assingning addresses to the literals not yet assigned an address)
 	 * 
 	 * @param assemblyLine the assembly line
 	 */
 	public void searchLiterals(AL assemblyLine){
-		//		Searching for literans and adding to LITTAB if found
+		//		Searching for literals and adding to LITTAB if found
 
 		if(assemblyLine.isLiteral()){
 			try{
+				//				searches LitTab to check if already inserted
 				if(litTab.containsKey(assemblyLine.getOperand1())){
 					throw new IllegalStateException();
 				}
+				//				Inserts literal to Littab with name value and lengt, but without address
 				else{
 					Literal lit = new Literal("", stripToValue(assemblyLine.getOperand1()), findNumberOfBytesInConstant(assemblyLine.getOperand1()));
 					litTab.put(assemblyLine.getOperand1(), lit);
@@ -245,9 +260,10 @@ public class TwoPass
 			}
 		}
 		else if(assemblyLine.getOpmnemonic().equals("LTORG") || assemblyLine.getOpmnemonic().equals("END")){
-
+			//			makes an iterator of the keys in littab
 			litIter = litTab.keySet().iterator();
 
+			//			runs through littab and assignes addresses to literals who has none
 			while(litIter.hasNext()){
 				String litIterString = litIter.next();
 				Literal tempLit = litTab.get(litIterString);
@@ -301,9 +317,14 @@ public class TwoPass
 	}
 
 	/**
-	 * Makes object code.
-	 * @param assemblyLine the assembly line
-	 * @return the string
+	 * Makes object code from sourcecode. Checks format, and if the x, or e flag is set
+	 * Also checks to see if its PC or BasePossible, and creates its correspondig object code
+	 * 
+	 * First checks the N and I flag(N=1 I=1 or N=1 I=0 or N=0 I=1 or N=0 I=0)
+	 * then proceeds to check the X, B, P and E flags
+	 * 
+	 * @param assemblyLine who contains sourcecode to be processed
+	 * @return the string objectCode
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public String makeObjectCode(AL assemblyLine) throws IOException{
@@ -613,24 +634,33 @@ public class TwoPass
 	/**
 	 * Hex math.
 	 * 
+	 * Takes two Hex-parameters in, and checks if the operator
+	 *  is - or + and does the corresponding calculation of the hexNumbers
+	 * 
 	 * @param hex1 the hex1
 	 * @param operator the operator
 	 * @param hex2 the hex2
 	 * @return the string
 	 */
 	public String hexMath(String hex1, char operator, String hex2){
-		if (operator=='+'){
-			int i1= Integer.parseInt(hex1,16);
-			int i2= Integer.parseInt(hex2,16);
-			hex1 = Integer.toHexString(i1+i2);
+		try {
+			if (operator=='+'){
+				int i1= Integer.parseInt(hex1,16);
+				int i2= Integer.parseInt(hex2,16);
+				hex1 = Integer.toHexString(i1+i2);
+			}
+			else if(operator=='-'){
+				int i1= Integer.parseInt(hex1,16);
+				int i2= Integer.parseInt(hex2,16);
+				hex1 = Integer.toHexString(i1-i2);
+			}
+			else throw new IllegalArgumentException();
+		} 
+		catch (IllegalArgumentException e) {
+			System.out.println("Error in input-operand for Hex Calculations(only - and + allowed)");
+			System.exit(0);
 		}
-		if(operator=='-'){
-			int i1= Integer.parseInt(hex1,16);
-			int i2= Integer.parseInt(hex2,16);
-			hex1 = Integer.toHexString(i1-i2);
-		}
-		//		else throw IllegalOperatorExeption;
-		return hex1;	
+		return hex1;
 	}
 
 	/**
@@ -985,7 +1015,7 @@ public class TwoPass
 	}
 
 	/**
-	 * Checks if pc is possible.
+	 * Checks if pc-calculation of the targetAddress/disp is possible.
 	 * 
 	 * @return boolean True if possible, false otherwise
 	 */
@@ -1026,7 +1056,7 @@ public class TwoPass
 	}
 
 	/**
-	 * Checks if base possible.
+	 * Checks if base-calculation of targetAddress/disp is possible.
 	 * 
 	 * @return boolean True if possible, false otherwise
 	 */
